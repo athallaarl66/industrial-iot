@@ -29,7 +29,10 @@ This project follows a monorepo approach:
     ├── /IndustrialIot.Application    # Use cases & DTOs
     ├── /IndustrialIot.Infrastructure # EF Core & MQTT persistence
     └── /IndustrialIot.Api            # Controllers & SignalR Hubs
-🚀 Getting Started (Local Development)
+
+
+## 🚀 Getting Started (Local Development)
+
 1. Prerequisites
 Ensure you have the following installed on your machine:
 
