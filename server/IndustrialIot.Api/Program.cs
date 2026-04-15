@@ -1,7 +1,11 @@
 using System.Text.Json;
 using FluentValidation;
+using IndustrialIot.Application.Repositories;
+using IndustrialIot.Application.Services;
 using IndustrialIot.Application.Validators;
+using IndustrialIot.Infrastructure.Mqtt;
 using IndustrialIot.Infrastructure.Persistence;
+using IndustrialIot.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +30,21 @@ builder.Services.AddCors(options =>
 
 // 3. Register Application Services & FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<CreateAssetValidator>();
+
+// Register Repositories
+builder.Services.AddScoped<IAssetRepository, AssetRepository>();
+
+// Register Services
+builder.Services.AddScoped<IAssetService, AssetService>();
+
+// Register MQTT Services
+builder.Services.Configure<MqttSettings>(
+    builder.Configuration.GetSection(MqttSettings.SectionName));
+builder.Services.AddSingleton<MqttClientService>();
+builder.Services.AddHostedService<MqttBackgroundService>();
+
+// Add Health Checks
+builder.Services.AddHealthChecks();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -71,5 +90,6 @@ if (app.Environment.IsDevelopment())
 app.UseCors("FrontendCorsPolicy");
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
