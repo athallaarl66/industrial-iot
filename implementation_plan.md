@@ -1,83 +1,64 @@
-# Phase 1: Foundation - Master Data (Asset Management)
+# Resolve Critical Gaps in Industrial IoT API
 
-Memulai sistem dari fondasi utama: **Master Data Assets**. Sebelum kita bisa memproses masuknya ribuan data telemetri dari MQTT, kita membutuhkan data "Aset" referensi yang jelas (misal: Pompa, Sumur Bor) beserta konfigurasinya di dalam database PostgreSQL.
+This plan addresses the three critical gaps identified to ensure the API can run correctly and has the necessary foundation for the remaining features.
 
-## Core Objective
-Mengimplementasikan Clean Architecture backend untuk mengelola CRUD Aset secara efisien, dengan standardisasi Response dan Error Handling yang seragam.
+## User Review Required
 
----
+> [!WARNING]
+> Please review the changes to the `Telemetry` entity. Adding new properties and a foreign key will require generating and applying a new Entity Framework Core migration (`AddTelemetryEnhancements`). Do you want me to run the database migration commands automatically after the code changes?
+
+> [!IMPORTANT]
+> For the Swagger XML Comments to work, I will update the `IndustrialIot.Api.csproj` to generate the documentation file. If there are other XML comment warnings, we can suppress them if they get too noisy.
 
 ## Proposed Changes
 
-### 1. Domain Layer (`IndustrialIot.Domain`)
-Lapisan ini bebas dari *dependency* eksternal. Hanya berisi entitas bisnis.
+### 1. Repository Implementation
+Implement the missing `IAssetRepository` interface and link it to Entity Framework Core.
 
-#### [NEW] `Entities/Asset.cs`
-- Properti: `Id` (Guid), `AssetCode`, `Name`, `Status`, `Location`, `LastMaintained`.
+#### [NEW] [AssetRepository.cs](file:///d:/Projects/industrial-iot/server/IndustrialIot.Infrastructure/Repositories/AssetRepository.cs)
+- Implement `GetAllAsync`, `GetByIdAsync`, `IsCodeExistsAsync`, `AddAsync`, and `DeleteAsync`.
+- Use `AsNoTracking` for read-only queries to optimize performance.
+- Use `AppDbContext`.
 
-#### [NEW] `Enums/AssetStatus.cs`
-- Mengandung Enum: `Running`, `Warning`, `Critical`, `Maintenance`.
+### 2. Domain & Infrastructure Updates
+Complete the `Telemetry` entity to include industry-standard properties.
 
----
+#### [MODIFY] [Telemetry.cs](file:///d:/Projects/industrial-iot/server/IndustrialIot.Domain/Entities/Telemetry.cs)
+- Add `public Asset? Asset { get; set; }` navigation property.
+- Add `public decimal VibrationX { get; set; }`, `VibrationY`, `VibrationZ`.
+- Add `public DateTime ReceivedAt { get; set; } = DateTime.UtcNow;`.
+- Add `public string DataQuality { get; set; } = "Good";`.
+- Add `public string DeviceId { get; set; } = string.Empty;`.
 
-### 2. Infrastructure Layer (`IndustrialIot.Infrastructure`)
-Implementasi persistence dengan Entity Framework Core (PostgreSQL).
+#### [MODIFY] [AppDbContext.cs](file:///d:/Projects/industrial-iot/server/IndustrialIot.Infrastructure/Persistence/AppDbContext.cs)
+- Configure precision for the new `Vibration` properties (18, 2).
+- Configure the `DataQuality` and `DeviceId` max lengths.
+- explicitly configure the `.HasOne(t => t.Asset).WithMany().HasForeignKey(t => t.AssetId)` relationship (if not relying entirely on conventions).
 
-#### [NEW] `Data/ApplicationDbContext.cs`
-- Mendaftarkan `DbSet<Asset>`.
-- Override `OnModelCreating` untuk menambahkan konfigurasi dasar dan Index (misal Index untuk `AssetCode`).
+### 3. API Service Registrations
+Register all necessary dependencies to resolve runtime errors.
 
-#### [NEW] `Configurations/AssetConfiguration.cs`
-- Menggunakan `IEntityTypeConfiguration<Asset>` untuk mendefinisikan skema secara eksplisit (Max length untuk Name, Unique constraint untuk AssetCode).
+#### [MODIFY] [Program.cs](file:///d:/Projects/industrial-iot/server/IndustrialIot.Api/Program.cs)
+- Register `IAssetRepository` to `AssetRepository` (Scoped).
+- Register `IAssetService` to `AssetService` (Scoped).
+- Add `builder.Services.AddHealthChecks();` and map the endpoint `app.MapHealthChecks("/health");`.
+- Enable XML Comments in the Swagger generator configuration.
 
----
+#### [MODIFY] [IndustrialIot.Api.csproj](file:///d:/Projects/industrial-iot/server/IndustrialIot.Api/IndustrialIot.Api.csproj)
+- Add `<GenerateDocumentationFile>true</GenerateDocumentationFile>` to the `<PropertyGroup>` so Swagger can pick up XML comments.
 
-### 3. Application Layer (`IndustrialIot.Application`)
-Core business rules dan DTOs.
+## Open Questions
 
-#### [NEW] `Common/ApiResponse.cs`
-- Standar response JSON: `{ success, message, data, errorCode }` agar penanganan di sisi *Frontend* seragam.
-
-#### [NEW] `DTOs/Asset/AssetDto.cs` & `CreateAssetDto.cs`
-- Model untuk request dan response.
-
-#### [NEW] `Validators/CreateAssetValidator.cs`
-- Menggunakan `FluentValidation` agar *Zero Trust* diterapkan di *backend* (Contoh: Code harus unik dan format tertentu).
-
-#### [NEW] `Services/IAssetService.cs` & `AssetService.cs`
-- Logic Create, Read (dengan *AsNoTracking()* karena read-only), Update, Delete.
-
----
-
-### 4. API Layer (`IndustrialIot.Api`)
-Entry point web app.
-
-#### [NEW] `Controllers/AssetsController.cs`
-- HTTP GET `/api/v1/assets`
-- HTTP POST `/api/v1/assets`
-- Di sini akan diimplementasikan *Global Exception Handler* (middleware) agar *database error string* tidak diexpose ke luar.
-
----
-
-## Resolved Discussions
-
-**AssetCode Validation (O&G Standard):**
-Karena target kita adalah proyek portfolio standar Enterprise (Oil & Gas), kita akan menerapkan **Global Industry Convention** sederhana untuk format *AssetCode*.
-
-Aturan `AssetCode` yang akan kita enforce di Backend dengan Regex:
-- **Format:** `[TIPE]-[LOKASI]-[NOMOR]`
-- **Contoh:** 
-  - `WH-A-001` (Wellhead, Zone A, Mesin 001)
-  - `PMP-B-015` (Pump, Zone B, Mesin 015)
-- **Regex Backend:** `^[A-Z]{2,4}-[A-Z0-9]+-[0-9]{3,4}$` (Hanya huruf kapital, angka, dashes).
-
-Ini akan menunjukkan kepada rekruter bahwa kamu paham tentang *Data Standardization* di industri berat.
+1. Do you want me to write and apply the `dotnet ef migrations add` command automatically to update the DB for the new `Telemetry` properties?
+2. Are you fine with placing `AssetRepository` in `IndustrialIot.Infrastructure/Repositories/` (which exists) rather than `Persistence/` to keep DbContext and Repositories cleanly separated?
 
 ## Verification Plan
 
-### Automated Tests / API Tests
-- Menjalankan `dotnet ef migrations add InitialAssetCreate` dan memastikan update database berjalan lancar.
-- Validasi via HTTP Client / Swagger untuk memastikan endpoint `/api/v1/assets` mengembalikan object `{ "success": true, ... }` dengan benar tanpa *expose* Error 500 mentah.
+### Automated Tests
+- Run `dotnet build` to ensure the clean architecture layers compile.
+- Run `dotnet ef migrations add CompleteTelemetryEntity` to ensure the entity modifications are correctly interpreted by EF.
 
 ### Manual Verification
-- Cek DB dengan `docker exec` (atau DBeaver) untuk memastikan tabel `Assets` terbuat dan constraints PostgreSQL-nya beroperasi sesuai harapan.
+- Start the API and ensure `swagger` launches without DI exceptions.
+- Verify `GET /health` returns a healthy status.
+- Test hitting an `AssetsController` endpoint to confirm the repository logic runs without runtime instantiation errors.
