@@ -5,7 +5,8 @@ namespace IndustrialIot.Domain.Enums;
 /// </summary>
 public enum AssetStatus
 {
-    Inactive = 0,
-    Active = 1,
-    Maintenance = 2
+    Running = 0,
+    Warning = 1,
+    Critical = 2,
+    Maintenance = 3
 }
