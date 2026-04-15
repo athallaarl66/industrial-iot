@@ -32,6 +32,7 @@ public class AppDbContext : DbContext
             // Presisi desimal untuk sensor industri
             entity.Property(e => e.Temperature).HasPrecision(18, 2);
             entity.Property(e => e.Pressure).HasPrecision(18, 2);
+            entity.Property(e => e.Vibration).HasPrecision(18, 2);
         });
     }
 }

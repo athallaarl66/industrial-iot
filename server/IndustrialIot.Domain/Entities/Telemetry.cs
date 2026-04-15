@@ -6,5 +6,6 @@ public class Telemetry
     public Guid AssetId { get; set; }
     public decimal Temperature { get; set; }
     public decimal Pressure { get; set; }
+    public decimal Vibration { get; set; }
     public DateTime Timestamp { get; set; }
 }
