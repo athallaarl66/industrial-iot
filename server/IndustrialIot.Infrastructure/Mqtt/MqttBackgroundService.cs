@@ -22,13 +22,18 @@ public class MqttBackgroundService : BackgroundService
 
         try
         {
+            // Start the message processing queue
+            var processingTask = _mqttClientService.ProcessQueueAsync(stoppingToken);
+
+            // Start the MQTT client
             await _mqttClientService.StartAsync(stoppingToken);
 
-            // Keep the service running
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                await Task.Delay(1000, stoppingToken);
-            }
+            // Wait for cancellation or processing task to complete
+            await Task.WhenAny(processingTask, Task.Delay(Timeout.Infinite, stoppingToken));
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("MQTT Background Service cancellation requested.");
         }
         catch (Exception ex)
         {

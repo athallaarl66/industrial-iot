@@ -7,5 +7,6 @@ public class Telemetry
     public decimal Temperature { get; set; }
     public decimal Pressure { get; set; }
     public decimal Vibration { get; set; }
-    public DateTime Timestamp { get; set; }
+    public DateTime EdgeTimestamp { get; set; }
+    public DateTime IngestionTimestamp { get; set; }
 }

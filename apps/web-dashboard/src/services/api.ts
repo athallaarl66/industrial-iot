@@ -1,21 +1,8 @@
+import type { Asset, CreateAssetForm as CreateAssetDto } from '../types';
+
 const API_BASE_URL = 'http://localhost:5234/api/v1';
 
-export interface Asset {
-  id: string;
-  assetCode: string;
-  name: string;
-  type: string;
-  location: string;
-  status: string;
-  createdAt: string;
-}
 
-export interface CreateAssetDto {
-  assetCode: string;
-  name: string;
-  type: string;
-  location: string;
-}
 
 export interface ApiResponse<T> {
   success: boolean;

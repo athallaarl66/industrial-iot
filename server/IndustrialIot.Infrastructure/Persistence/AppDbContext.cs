@@ -25,8 +25,9 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Telemetry>(entity => {
             entity.HasKey(e => e.Id);
             
-            // Indexing Timestamp karena akan sangat sering di-query untuk grafik
-            entity.HasIndex(e => e.Timestamp);
+            // Indexing Timestamps karena akan sangat sering di-query untuk grafik dan audit
+            entity.HasIndex(e => e.EdgeTimestamp);
+            entity.HasIndex(e => e.IngestionTimestamp);
             entity.HasIndex(e => e.AssetId);
 
             // Presisi desimal untuk sensor industri

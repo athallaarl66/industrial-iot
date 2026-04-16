@@ -1,7 +1,7 @@
 # 📋 Industrial IoT Project Checklist
 
-**Last Updated:** 2026-04-15  
-**Overall Progress:** ~60% Complete
+**Last Updated:** 2026-04-16  
+**Overall Progress:** ~70% Complete
 
 ---
 
@@ -88,30 +88,29 @@
 - [x] Logging configured
 - [x] Test users created in passwords file
 
-### Backend MQTT Service (90%)
+### Backend MQTT Service ✅
 - [x] MQTTnet package installed
 - [x] `MqttSettings` configuration class
-- [x] `MqttClientService` implemented
+- [x] `MqttClientService` implemented with high-throughput logic
 - [x] `MqttBackgroundService` for hosted service
-- [x] Message handling and deserialization
-- [x] Database persistence for telemetry
+- [x] Message handling and deserialization (Fixed MQTTnet 4 handling)
+- [x] Database persistence for telemetry (Fixed captive dependency)
+- [x] High-throughput logic (System.Threading.Channels implemented)
+- [x] EdgeTimestamp support (Primary time source)
 - [x] Basic alert logging
 - [x] Configuration in `appsettings.json`
 - [x] Dependency injection registered
-- [ ] **2 compilation errors remaining:**
-  - [ ] `MqttFactory` namespace issue
-  - [ ] `ReadOnlySequence<byte>` conversion issue
 
 ### MQTT Topics ✅
 - [x] Topic pattern: `telemetry/+`
 - [x] Subscription logic implemented
 - [x] Asset code extraction from topic
 
-### Testing (Pending)
-- [ ] Fix compilation errors
-- [ ] Test MQTT connection to broker
-- [ ] Test message reception
-- [ ] Test database persistence
+### Testing ✅
+- [x] Fix compilation errors
+- [x] Test MQTT connection to broker
+- [x] Test message reception
+- [x] Test database persistence
 - [ ] Create MQTT simulator/test client
 
 ---
@@ -253,19 +252,19 @@
 ### Progress by Phase:
 - Phase 1 (Backend Foundation): 100% ✅
 - Phase 2 (Frontend Dashboard): 100% ✅  
-- Phase 3 (MQTT Telemetry): 90% ⚠️
+- Phase 3 (MQTT Telemetry): 100% ✅
 - Phase 4 (Real-time Updates): 0% ❌
 - Phase 5 (Alert System): 0% ❌
 - Phase 6 (Security): 0% ❌
 - Phase 7 (Testing): 0% ❌
 - Phase 8 (Deployment): 0% ❌
 
-### Overall Progress: **~60%**
+### Overall Progress: **~70%**
 
 ### Next Priority Tasks:
-1. Fix 2 MQTT compilation errors (~5 min)
-2. Test MQTT connection and message flow (~10 min)
-3. Implement SignalR real-time updates (~30 min)
+1. Implement SignalR real-time updates (~30 min)
+2. Add Alert State Machine logic (~40 min)
+3. Setup MQTT Simulator for E2E testing (~15 min)
 
 ---
 
@@ -301,17 +300,16 @@ npm run dev
 
 ## 📝 NOTES
 
-### Recent Achievements (2026-04-15):
-- ✅ Fixed critical DI registration issues
-- ✅ Completed frontend dashboard with full CRUD
-- ✅ Established frontend-backend connectivity
-- ✅ Implemented MQTT service architecture
-- ⚠️ MQTT service needs 2 small fixes
+### Recent Achievements (2026-04-16):
+- ✅ Fixed Tailwind v4 PostCSS blocking error
+- ✅ Refactored MQTT Ingestor with `System.Threading.Channels` (Producer-Consumer)
+- ✅ Fixed Captive Dependency issue in `MqttClientService`
+- ✅ Updated `Telemetry` model to industrial grade (`EdgeTimestamp`)
+- ✅ Verified MQTTnet 4 compatibility
 
 ### Known Issues:
-- MQTT service has 2 compilation errors (namespace and type conversion)
-- Swagger UI minor configuration issue
-- No real-time updates yet (SignalR pending)
+- SignalR pending integration
+- No Alerting Logic yet
 
 ### Technical Debt:
 - Add comprehensive error logging

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Asset } from '../types';
+import type { Asset } from '../types';
 import { apiService } from '../services/api';
 
 export function AssetList() {

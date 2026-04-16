@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CreateAssetForm } from '../types';
+import type { CreateAssetForm } from '../types';
 import { apiService } from '../services/api';
 
 interface AssetFormProps {
