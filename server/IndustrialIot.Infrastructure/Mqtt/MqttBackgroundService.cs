@@ -20,31 +20,49 @@ public class MqttBackgroundService : BackgroundService
     {
         _logger.LogInformation("MQTT Background Service starting...");
 
-        try
-        {
-            // Start the message processing queue
-            var processingTask = _mqttClientService.ProcessQueueAsync(stoppingToken);
+        // Start the message processing queue (runs independently of the connection)
+        var processingTask = _mqttClientService.ProcessQueueAsync(stoppingToken);
 
-            // Start the MQTT client
-            await _mqttClientService.StartAsync(stoppingToken);
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                _logger.LogInformation("Attempting to connect to MQTT broker...");
+                await _mqttClientService.StartAsync(stoppingToken);
+                
+                _logger.LogInformation("Successfully connected to MQTT broker. Monitoring connection...");
+                
+                // Keep the service alive while connected. 
+                // If the processing task fails, we should detect it.
+                await Task.WhenAny(processingTask, Task.Delay(Timeout.Infinite, stoppingToken));
+                
+                if (processingTask.IsCompleted && !stoppingToken.IsCancellationRequested)
+                {
+                    _logger.LogWarning("Telemetry processing task completed unexpectedly. Restarting processing queue...");
+                    processingTask = _mqttClientService.ProcessQueueAsync(stoppingToken);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("MQTT Background Service cancellation requested.");
+                break;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "MQTT Background Service encountered an error during connection. Retrying in 10 seconds...");
+                try 
+                {
+                    await Task.Delay(10000, stoppingToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+        }
 
-            // Wait for cancellation or processing task to complete
-            await Task.WhenAny(processingTask, Task.Delay(Timeout.Infinite, stoppingToken));
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("MQTT Background Service cancellation requested.");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "MQTT Background Service encountered an error");
-            throw;
-        }
-        finally
-        {
-            _logger.LogInformation("MQTT Background Service stopping...");
-            await _mqttClientService.StopAsync();
-        }
+        _logger.LogInformation("MQTT Background Service stopping...");
+        await _mqttClientService.StopAsync();
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
