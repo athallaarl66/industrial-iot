@@ -54,3 +54,9 @@ Thumbs.db
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# ==========================================
+# 6. AI ASSISTANT & CONFIGS
+# ==========================================
+.claude/
+openspec/
