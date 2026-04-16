@@ -25,7 +25,11 @@ public class MqttClientService : IAsyncDisposable
         _settings = settings.Value;
         _dbContext = dbContext;
         _logger = logger;
-        _mqttClient = new MqttFactory().CreateMqttClient();
+
+        // Create MQTT client using factory
+        var factory = new MqttFactory();
+        _mqttClient = factory.CreateMqttClient();
+
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
@@ -94,8 +98,21 @@ public class MqttClientService : IAsyncDisposable
 
             _logger.LogDebug("Received message on topic {Topic}", topic);
 
-            // Convert payload segment to string
-            var payloadString = Encoding.UTF8.GetString(payloadSegment.ToArray());
+            // Convert ReadOnlySequence<byte> to string
+            var payloadString = string.Empty;
+            if (payloadSegment.IsSingleSegment)
+            {
+                // Fast path for single segment
+                payloadString = Encoding.UTF8.GetString(payloadSegment.FirstSpan);
+            }
+            else
+            {
+                // Slow path for multiple segments
+                var payloadArray = new byte[payloadSegment.Length];
+                payloadSegment.CopyTo(payloadArray);
+                payloadString = Encoding.UTF8.GetString(payloadArray);
+            }
+
             _logger.LogDebug("Payload: {Payload}", payloadString);
 
             // Parse telemetry data
