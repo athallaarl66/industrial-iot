@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import type { Asset } from '../types';
-import { apiService } from '../services/api';
+import { useState, useEffect, useCallback } from "react";
+import type { Asset, TelemetryUpdate } from "../types";
+import { apiService } from "../services/api";
+import { signalRService } from "../services/signalr";
 
 export function AssetList() {
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -11,6 +12,58 @@ export function AssetList() {
     loadAssets();
   }, []);
 
+  const updateAsset = useCallback((update: TelemetryUpdate) => {
+    setAssets((prevAssets) =>
+      prevAssets.map((asset) =>
+        asset.assetCode === update.AssetCode
+          ? {
+              ...asset,
+              status: update.Status as Asset["status"],
+              temperature: update.Temperature,
+              pressure: update.Pressure,
+              vibration: update.Vibration,
+              lastUpdate: update.IngestionTimestamp,
+              alertMessage: update.AlertMessage,
+            }
+          : asset,
+      ),
+    );
+  }, []);
+
+  useEffect(() => {
+    const initSignalR = async () => {
+      try {
+        await signalRService.connect();
+        signalRService.on("onTelemetryUpdate", updateAsset);
+        signalRService.on(
+          "onAlert",
+          (data: { assetCode: string; message: string; severity: string }) => {
+            console.log("Alert:", data);
+            updateAsset({
+              AssetCode: data.assetCode,
+              Status: data.severity,
+              Temperature: 0,
+              Pressure: 0,
+              Vibration: 0,
+              IngestionTimestamp: new Date().toISOString(),
+              AlertMessage: data.message,
+            } as TelemetryUpdate);
+          },
+        );
+
+        assets.forEach((asset) => signalRService.joinAsset(asset.assetCode));
+      } catch (err) {
+        console.error("SignalR connection failed:", err);
+      }
+    };
+
+    initSignalR();
+
+    return () => {
+      signalRService.disconnect();
+    };
+  }, []);
+
   const loadAssets = async () => {
     try {
       setLoading(true);
@@ -19,42 +72,42 @@ export function AssetList() {
         setAssets(response.data);
         setError(null);
       } else {
-        setError(response.message || 'Failed to load assets');
+        setError(response.message || "Failed to load assets");
       }
     } catch (err) {
-      setError('An error occurred while loading assets');
+      setError("An error occurred while loading assets");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this asset?')) return;
+    if (!confirm("Are you sure you want to delete this asset?")) return;
 
     try {
       const response = await apiService.deleteAsset(id);
       if (response.success) {
         loadAssets(); // Reload the list
       } else {
-        setError(response.message || 'Failed to delete asset');
+        setError(response.message || "Failed to delete asset");
       }
     } catch (err) {
-      setError('An error occurred while deleting asset');
+      setError("An error occurred while deleting asset");
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Running':
-        return 'bg-green-100 text-green-800';
-      case 'Warning':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Critical':
-        return 'bg-red-100 text-red-800';
-      case 'Maintenance':
-        return 'bg-gray-100 text-gray-800';
+      case "Running":
+        return "bg-green-100 text-green-800";
+      case "Warning":
+        return "bg-yellow-100 text-yellow-800";
+      case "Critical":
+        return "bg-red-100 text-red-800";
+      case "Maintenance":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -85,7 +138,9 @@ export function AssetList() {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500 text-lg">No assets found</p>
-        <p className="text-gray-400 text-sm mt-2">Create your first asset to get started</p>
+        <p className="text-gray-400 text-sm mt-2">
+          Create your first asset to get started
+        </p>
       </div>
     );
   }
@@ -111,6 +166,18 @@ export function AssetList() {
               Status
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Temperature (°C)
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Pressure (PSI)
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Vibration (mm/s)
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Last Update
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Created
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -122,7 +189,9 @@ export function AssetList() {
           {assets.map((asset) => (
             <tr key={asset.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900">{asset.assetCode}</div>
+                <div className="text-sm font-medium text-gray-900">
+                  {asset.assetCode}
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">{asset.name}</div>
@@ -134,9 +203,30 @@ export function AssetList() {
                 <div className="text-sm text-gray-900">{asset.location}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(asset.status)}`}>
+                <span
+                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(asset.status)}`}
+                >
                   {asset.status}
                 </span>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {asset.temperature?.toFixed(1) ?? "—"}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {asset.pressure?.toFixed(0) ?? "—"}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {asset.vibration?.toFixed(1) ?? "—"}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {asset.lastUpdate
+                  ? new Date(asset.lastUpdate).toLocaleTimeString()
+                  : "—"}
+                {asset.alertMessage && (
+                  <div className="text-xs text-red-600 mt-1 line-clamp-1">
+                    ⚠️ {asset.alertMessage}
+                  </div>
+                )}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">

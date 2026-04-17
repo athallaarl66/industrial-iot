@@ -1,6 +1,7 @@
 # Architecture Decision Records (ADR)
 
 ## Overview
+
 This document contains architecture decisions made for the Industrial IoT Asset Monitoring System. Each decision follows the standard ADR format with context, decision, and consequences.
 
 ---
@@ -8,15 +9,19 @@ This document contains architecture decisions made for the Industrial IoT Asset 
 ## ADR-001: PostgreSQL vs MongoDB for Time-Series Data
 
 ### Status
+
 **Accepted**
 
 ### Context
+
 The system must handle high-frequency telemetry data (10,000+ messages/second) with complex relationships between assets, sensors, and historical data. Need to choose a database that can handle time-series queries efficiently while maintaining data integrity.
 
 ### Decision
+
 **Chosen: PostgreSQL with EF Core**
 
 ### Rationale
+
 - **ACID Compliance:** Guaranteed data consistency for critical industrial data
 - **Relationship Support:** Complex queries between Assets, Telemetry, Alerts
 - **Indexing Strategy:** Powerful indexing for time-based queries
@@ -25,6 +30,7 @@ The system must handle high-frequency telemetry data (10,000+ messages/second) w
 - **Skill Alignment:** Fits .NET ecosystem with EF Core
 
 ### Alternatives Considered
+
 - **MongoDB:**
   - Pros: Schema flexibility, good for time-series data
   - Cons: Less mature transaction support, higher learning curve
@@ -36,6 +42,7 @@ The system must handle high-frequency telemetry data (10,000+ messages/second) w
   - Cons: Additional complexity, migration path less clear
 
 ### Consequences
+
 - **Positive:**
   - Enterprise-grade data integrity with ACID compliance
   - Seamless integration with EF Core and .NET ecosystem
@@ -47,6 +54,7 @@ The system must handle high-frequency telemetry data (10,000+ messages/second) w
   - Future migration to TimescaleDB possible if performance issues arise
 
 ### Monitoring
+
 - Monitor database query performance for time-series queries
 - Track index usage and effectiveness
 - Monitor database size growth and plan partitioning if needed
@@ -57,15 +65,19 @@ The system must handle high-frequency telemetry data (10,000+ messages/second) w
 ## ADR-002: MQTT vs HTTP for Telemetry Ingestion
 
 ### Status
+
 **Accepted**
 
 ### Context
+
 Industrial IoT system needs reliable, low-latency communication for real-time sensor data from edge devices. Communication method affects system performance, reliability, and infrastructure complexity.
 
 ### Decision
+
 **Chosen: MQTT with Eclipse Mosquitto Broker**
 
 ### Rationale
+
 - **Low Latency:** Minimal overhead for real-time communication
 - **Bandwidth Efficient:** Small packet headers ideal for IoT devices
 - **Quality of Service:** Configurable delivery guarantees (QoS levels)
@@ -75,6 +87,7 @@ Industrial IoT system needs reliable, low-latency communication for real-time se
 - **Scalable:** Broker can handle thousands of concurrent connections
 
 ### Alternatives Considered
+
 - **HTTP REST API:**
   - Pros: Well-understood, widely supported, easy to implement
   - Cons: Higher latency, heavier bandwidth, no push mechanism
@@ -86,6 +99,7 @@ Industrial IoT system needs reliable, low-latency communication for real-time se
   - Cons: Less mature ecosystem, fewer libraries
 
 ### Consequences
+
 - **Positive:**
   - Excellent performance for high-frequency sensor data
   - Natural fit for one-to-many device communication
@@ -97,12 +111,14 @@ Industrial IoT system needs reliable, low-latency communication for real-time se
   - Less familiar to traditional web developers
 
 ### Implementation Notes
+
 - Broker security configuration critical (authentication, TLS)
 - Quality of Service (QoS) levels appropriate per use case
 - Reconnection strategy needed for device reliability
 - Message validation required at backend
 
 ### Future Considerations
+
 - MQTT v5 adoption for advanced features
 - Broker clustering for high availability
 - Integration with enterprise message brokers (IBM MQ, Azure IoT Hub)
@@ -112,15 +128,19 @@ Industrial IoT system needs reliable, low-latency communication for real-time se
 ## ADR-003: Clean Architecture vs Traditional Layered
 
 ### Status
+
 **Accepted**
 
 ### Context
+
 Building an enterprise-grade system that requires maintainability, testability, and flexibility for future growth. Need to choose an architectural pattern that supports these requirements while balancing development complexity.
 
 ### Decision
+
 **Chosen: Clean Architecture with Domain-Driven Design**
 
 ### Rationale
+
 - **Separation of Concerns:** Clear boundaries between business logic, data access, and presentation
 - **Testability:** Each layer can be tested in isolation with mocks
 - **Maintainability:** Business logic independent of frameworks and databases
@@ -130,6 +150,7 @@ Building an enterprise-grade system that requires maintainability, testability, 
 - **Scalability:** Natural separation allows independent scaling of components
 
 ### Layer Structure
+
 ```
 ┌─────────────────────────────────────────────────┐
 │         API Layer (Presentation)           │
@@ -147,6 +168,7 @@ Building an enterprise-grade system that requires maintainability, testability, 
 ```
 
 ### Alternatives Considered
+
 - **Traditional N-Tier:**
   - Pros: Simpler initial setup, easier for junior developers
   - Cons: Tight coupling, harder to test, less flexibility
@@ -158,6 +180,7 @@ Building an enterprise-grade system that requires maintainability, testability, 
   - Cons: More abstract, harder to understand initially
 
 ### Consequences
+
 - **Positive:**
   - Highly maintainable codebase with clear boundaries
   - Excellent testability with isolated unit tests
@@ -171,6 +194,7 @@ Building an enterprise-grade system that requires maintainability, testability, 
   - May feel like over-engineering for simple features
 
 ### Best Practices
+
 - Domain layer remains framework-agnostic
 - Dependencies always point inward (toward domain)
 - Use dependency injection for layer coupling
@@ -182,15 +206,19 @@ Building an enterprise-grade system that requires maintainability, testability, 
 ## ADR-004: React vs Vue.js for Frontend
 
 ### Status
+
 **Accepted**
 
 ### Context
+
 Building an enterprise-grade dashboard for real-time IoT data visualization. Need a modern frontend framework that supports component-based architecture, real-time updates, and has strong ecosystem support.
 
 ### Decision
+
 **Chosen: React 19 with TypeScript**
 
 ### Rationale
+
 - **Large Ecosystem:** Extensive library support for charts, components, utilities
 - **TypeScript Integration:** Excellent support for type-safe development
 - **Performance:** Virtual DOM and recent optimizations for efficient rendering
@@ -200,6 +228,7 @@ Building an enterprise-grade dashboard for real-time IoT data visualization. Nee
 - **Career Growth:** Strong alignment with current job market demands
 
 ### Alternatives Considered
+
 - **Vue.js 3:**
   - Pros: Simpler learning curve, excellent performance, smaller bundle size
   - Cons: Smaller ecosystem, fewer enterprise examples
@@ -211,6 +240,7 @@ Building an enterprise-grade dashboard for real-time IoT data visualization. Nee
   - Cons: Smaller ecosystem, less enterprise adoption
 
 ### Consequences
+
 - **Positive:**
   - Excellent real-time performance for live sensor data
   - Large component ecosystem for rapid development
@@ -223,6 +253,7 @@ Building an enterprise-grade dashboard for real-time IoT data visualization. Nee
   - Need to manage dependencies carefully to avoid bloat
 
 ### Implementation Considerations
+
 - Use functional components and hooks (modern React patterns)
 - Implement proper state management (consider Redux/Zustand if needed)
 - Optimize re-renders for high-frequency updates
@@ -233,15 +264,19 @@ Building an enterprise-grade dashboard for real-time IoT data visualization. Nee
 ## ADR-005: Vite vs CRA (Create React App)
 
 ### Status
+
 **Accepted**
 
 ### Context
+
 Need a build tool and development server that supports modern frontend development practices with fast iteration and optimized production builds.
 
 ### Decision
+
 **Chosen: Vite**
 
 ### Rationale
+
 - **Fast Development:** Lightning-fast HMR (Hot Module Replacement)
 - **Modern Build:** Optimized production builds with excellent performance
 - **Simple Configuration:** Minimal setup, opinionated defaults
@@ -251,6 +286,7 @@ Need a build tool and development server that supports modern frontend developme
 - **Active Development:** Actively maintained and improved
 
 ### Alternatives Considered
+
 - **Create React App (CRA):**
   - Pros: Official tooling, zero-config setup, well-documented
   - Cons: Slower builds, larger bundles, less customizable
@@ -262,6 +298,7 @@ Need a build tool and development server that supports modern frontend developme
   - Cons: Complex configuration, steep learning curve
 
 ### Consequences
+
 - **Positive:**
   - Excellent development experience with fast hot reloading
   - Optimized production builds for better performance
@@ -273,6 +310,7 @@ Need a build tool and development server that supports modern frontend developme
   - Some plugins may not be as mature as Webpack
 
 ### Performance Impact
+
 - Faster iteration during development (5-10x faster HMR)
 - Smaller production bundles due to better tree-shaking
 - Better development experience with near-instant updates
@@ -282,15 +320,19 @@ Need a build tool and development server that supports modern frontend developme
 ## ADR-006: SignalR vs Polling for Real-time Updates
 
 ### Status
+
 **Accepted**
 
 ### Context
+
 Dashboard needs real-time updates from IoT devices (telemetry data, alerts, system status). Need a real-time communication mechanism that's efficient and reliable.
 
 ### Decision
+
 **Chosen: ASP.NET Core SignalR**
 
 ### Rationale
+
 - **Real-time Performance:** Efficient WebSocket-based communication
 - **Automatic Reconnection:** Handles network interruptions gracefully
 - **Server-Sent Events:** Automatic fallback if WebSockets unavailable
@@ -301,6 +343,7 @@ Dashboard needs real-time updates from IoT devices (telemetry data, alerts, syst
 - **Enterprise Ready:** Used in production by many large companies
 
 ### Alternatives Considered
+
 - **HTTP Polling:**
   - Pros: Simple implementation, works everywhere
   - Cons: High server load, latency, wasted bandwidth
@@ -315,6 +358,7 @@ Dashboard needs real-time updates from IoT devices (telemetry data, alerts, syst
   - Cons: Additional complexity, not integrated with ASP.NET
 
 ### Consequences
+
 - **Positive:**
   - Excellent real-time performance with low latency
   - Automatic handling of connection issues
@@ -327,6 +371,7 @@ Dashboard needs real-time updates from IoT devices (telemetry data, alerts, syst
   - Scaling requires Redis backplane for multiple servers
 
 ### Implementation Considerations
+
 - Use connection groups for targeted messaging
 - Implement robust error handling for connection issues
 - Plan for JWT authentication with SignalR
@@ -338,15 +383,19 @@ Dashboard needs real-time updates from IoT devices (telemetry data, alerts, syst
 ## ADR-007: FluentValidation vs Data Annotations
 
 ### Status
+
 **Accepted**
 
 ### Context
+
 Need input validation system that's powerful, maintainable, and follows enterprise best practices. Validation is critical for "Zero Trust" security approach.
 
 ### Decision
+
 **Chosen: FluentValidation**
 
 ### Rationale
+
 - **Separation of Concerns:** Validation logic separate from domain entities
 - **Rule Reusability:** Validation rules can be reused across DTOs
 - **Complex Rules:** Support for advanced validation scenarios
@@ -356,6 +405,7 @@ Need input validation system that's powerful, maintainable, and follows enterpri
 - **Zero Trust:** Server-side validation (not relying on client-side only)
 
 ### Alternatives Considered
+
 - **Data Annotations:**
   - Pros: Built-in, simple for basic validation
   - Cons: Limited functionality, tied to entities, less flexible
@@ -367,6 +417,7 @@ Need input validation system that's powerful, maintainable, and follows enterpri
   - Cons: Still limited functionality, attribute-based approach
 
 ### Consequences
+
 - **Positive:**
   - Flexible and powerful validation capabilities
   - Clean separation from business logic
@@ -379,6 +430,7 @@ Need input validation system that's powerful, maintainable, and follows enterpri
   - Steeper learning curve than simple attributes
 
 ### Best Practices
+
 - Create separate validators for each DTO
 - Use descriptive error messages
 - Test all validation rules
@@ -390,15 +442,19 @@ Need input validation system that's powerful, maintainable, and follows enterpri
 ## ADR-008: Docker Compose vs Individual Containers
 
 ### Status
+
 **Accepted**
 
 ### Context
+
 Need a development and deployment strategy that's consistent, reproducible, and easy to manage across different environments.
 
 ### Decision
+
 **Chosen: Docker Compose with Multi-Container Orchestration**
 
 ### Rationale
+
 - **Consistency:** Same environment across development and production
 - **Simplified Management:** Single command to start/stop all services
 - **Networking:** Automatic network configuration between containers
@@ -408,6 +464,7 @@ Need a development and deployment strategy that's consistent, reproducible, and 
 - **Production Ready:** Can be adapted for production deployment
 
 ### Alternatives Considered
+
 - **Individual Docker Containers:**
   - Pros: More control over individual containers
   - Cons: Complex networking, manual volume management, harder to reproduce
@@ -419,6 +476,7 @@ Need a development and deployment strategy that's consistent, reproducible, and 
   - Cons: Environment inconsistencies, hard to reproduce, setup complexity
 
 ### Consequences
+
 - **Positive:**
   - Reproducible development environment
   - Easy team onboarding
@@ -432,6 +490,7 @@ Need a development and deployment strategy that's consistent, reproducible, and 
   - Resource overhead for containerization
 
 ### Implementation Considerations
+
 - Use multi-stage Dockerfiles for optimization
 - Configure proper networking between services
 - Implement volume persistence for databases
@@ -443,15 +502,19 @@ Need a development and deployment strategy that's consistent, reproducible, and 
 ## ADR-009: UTC vs Local Time for Timestamps
 
 ### Status
+
 **Accepted**
 
 ### Context
+
 Industrial IoT system operates globally with assets in different time zones. Need consistent timestamp handling for data accuracy and synchronization.
 
 ### Decision
+
 **Chosen: UTC for all timestamps, convert to local in presentation layer**
 
 ### Rationale
+
 - **Consistency:** All data stored in UTC for consistency
 - **Time Zone Agnostic:** No issues with daylight saving time changes
 - **Comparison:** Easy to compare events across different time zones
@@ -461,6 +524,7 @@ Industrial IoT system operates globally with assets in different time zones. Nee
 - **Localization:** Display in user's local time at presentation layer
 
 ### Alternatives Considered
+
 - **Local Time Storage:**
   - Pros: Simple for single time zone systems
   - Cons: Complex for multi-zone systems, DST issues
@@ -469,6 +533,7 @@ Industrial IoT system operates globally with assets in different time zones. Nee
   - Cons: Complex to manage, database-specific implementation
 
 ### Consequences
+
 - **Positive:**
   - Consistent timestamp handling across all systems
   - No issues with time zone changes
@@ -481,6 +546,7 @@ Industrial IoT system operates globally with assets in different time zones. Nee
   - Debugging requires UTC time understanding
 
 ### Implementation Considerations
+
 - All database timestamps stored in UTC
 - Client-side conversion to user's local time
 - Store original timestamp from IoT device (also UTC)
@@ -492,15 +558,19 @@ Industrial IoT system operates globally with assets in different time zones. Nee
 ## ADR-010: Swagger/OpenAPI vs API Blueprint
 
 ### Status
+
 **Accepted**
 
 ### Context
+
 Need API documentation that's automatically generated, maintainable, and provides interactive testing capabilities for developers and external consumers.
 
 ### Decision
+
 **Chosen: Swagger/OpenAPI with Swashbuckle**
 
 ### Rationale
+
 - **Auto-Generated:** Documentation stays in sync with code
 - **Interactive UI:** Built-in testing interface (Swagger UI)
 - **Type Safety:** Reflects actual C# types and structure
@@ -510,6 +580,7 @@ Need API documentation that's automatically generated, maintainable, and provide
 - **Developer Friendly:** Reduces documentation maintenance burden
 
 ### Alternatives Considered
+
 - **API Blueprint:**
   - Pros: Simple syntax, tooling support
   - Cons: Less automatic integration, requires manual updates
@@ -521,6 +592,7 @@ Need API documentation that's automatically generated, maintainable, and provide
   - Cons: Not generated from code, manual maintenance
 
 ### Consequences
+
 - **Positive:**
   - Always up-to-date with code changes
   - Interactive testing interface for developers
@@ -533,6 +605,7 @@ Need API documentation that's automatically generated, maintainable, and provide
   - UI limited to standard Swagger interface
 
 ### Implementation Considerations
+
 - Enable XML documentation comments in project
 - Use proper `[ProducesResponseType]` attributes
 - Provide request/response examples
@@ -541,9 +614,161 @@ Need API documentation that's automatically generated, maintainable, and provide
 
 ---
 
+## ADR-011: Infrastructure System Architecture Standards
+
+### Status
+
+**Accepted**
+
+### Context
+
+The system requires standardized infrastructure architecture for development, deployment, and scaling. Docker Compose provides multi-container orchestration, but needs visual standards and best practices documentation for enterprise deployment.
+
+### Decision
+
+**Docker Compose Multi-Container Architecture with Mermaid Diagrams**
+
+### Rationale
+
+- **Reproducibility**: `docker-compose up` launches full stack.
+- **Isolation & Networking**: Internal Docker network for service communication.
+- **Persistence**: Volumes for PostgreSQL data and MQTT persistence.
+- **Visualization**: Mermaid diagrams for instant comprehension.
+- **Production Path**: Basis for Kubernetes migration.
+
+### System Component Architecture
+
+```mermaid
+graph TB
+    subgraph "Frontend"
+        FE[React 19 + TypeScript + Vite + Tailwind]
+    end
+
+    subgraph "Backend API"
+        API[.NET 8 Clean Arch + SignalR Hubs]
+        CTRL[Controllers + Services]
+    end
+
+    subgraph "Data Layer"
+        PG[PostgreSQL 16<br/>Timeseries Optimized]
+        MQ[Mosquitto MQTT Broker<br/>QoS 0/1 Support]
+    end
+
+    subgraph "Edge"
+        IOT[Sensors & PLCs<br/>MQTT 3.1.1 Clients]
+    end
+
+    IOT -->|MQTT 1883| MQ
+    MQ -->|Telemetry Stream| API
+    FE <-->|REST + WebSockets 5234| API
+    API <-->|EF Core| PG
+    API -.->|Live Updates| FE
+
+    classDef edge fill:#ff6b35
+    classDef data fill:#4ecdc4
+    classDef api fill:#45b7d1
+    classDef frontend fill:#96ceb4
+    class IOT edge
+    class PG,MQ data
+    class API,CTRL api
+    class FE frontend
+```
+
+### Docker Compose Deployment Standards
+
+```mermaid
+flowchart TD
+    DEV[Developer] -->|"docker-compose up -d"| DC[Docker Compose v3.9+]
+
+    subgraph "iot-network (172.20.0.0/16)"
+        PGc[d:/Projects/industrial-iot/infra/db_data<br/>postgres:16-alpine]
+        MQc[d:/Projects/industrial-iot/infra/mosquitto<br/>eclipse-mosquitto:latest]
+        APIc[IndustrialIot.Api<br/>.NET 8 Runtime]
+        FEc[web-dashboard<br/>Node 20 + Vite]
+    end
+
+    DC --> PGc
+    DC --> MQc
+    DC --> APIc
+    DC --> FEc
+
+    PGc -.-|"5433:5432"| HOST[Host Machine]
+    MQc -.-|"1883:1883<br/>9001:9001"| HOST
+    APIc -.-|"5234:80"| HOST
+    FEc -.-|"5173:5173"| HOST
+
+    classDef container fill:#ffeaa7,stroke:#d63031
+    class PGc,MQc,APIc,FEc container
+```
+
+### Real-Time Data Flow (E2E)
+
+```mermaid
+sequenceDiagram
+    participant IOT as Edge Device
+    participant MQB as Mosquitto Broker
+    participant APIB as .NET Backend
+    participant DB as PostgreSQL
+    participant HUB as SignalR Hub
+    participant FRT as React Frontend
+
+    Note over IOT,FRT: QoS 0 Telemetry (3s interval)
+
+    IOT->>+MQB: PUBLISH iot/telemetry/PMP-A-001
+    MQB->>+APIB: Forward JSON Payload
+    APIB->>+DB: INSERT Telemetry Record
+    DB-->>-APIB: Persisted OK
+    APIB->>+HUB: Clients.Group("PMP-A-001").Update()
+    HUB->>+FRT: SignalR: {assetCode:"PMP-A-001", temp:85.5}
+    FRT-->>-HUB: Re-render Live Charts
+    APIB-->>-MQB: ACK
+    MQB-->>-IOT: QoS Complete
+```
+
+### Alternatives Considered
+
+- **Kubernetes**: Enterprise scaling but overkill for MVP.
+- **Manual Scripts**: Fast but non-reproducible.
+- **Helm Charts**: Complex for local dev.
+
+### Consequences
+
+**Positive:**
+
+- Visual standards accelerate onboarding.
+- Single-command reproducible environments.
+- Clear scaling path (Redis → K8s).
+
+**Negative:**
+
+- Docker overhead (~2GB RAM local).
+- Volume management discipline required.
+
+### Standards
+
+```
+NETWORK: iot-network
+PORTS:
+  - API: 5234
+  - PG: 5433
+  - MQTT: 1883/9001
+VOLUMES:
+  - pgdata: /infra/db_data
+  - mqtt: /infra/mosquitto/{config,data,log}
+```
+
+### Future Evolution
+
+- Redis Sentinel for SignalR scale-out.
+- Kubernetes manifests from Compose.
+- Terraform for cloud infra.
+
+---
+
 ## Decision Review Process
 
 ### Criteria for Architecture Decisions
+
 1. **Business Alignment:** Supports business requirements and user needs
 2. **Technical Excellence:** Follows industry best practices
 3. **Maintainability:** Long-term sustainability and evolution
@@ -552,6 +777,7 @@ Need API documentation that's automatically generated, maintainable, and provide
 6. **Team Skills:** Aligns with team capabilities and learning goals
 
 ### Decision Updates
+
 - **Status:** Decisions can be revised if context changes
 - **Documentation:** Update ADR if implementation differs significantly
 - **Review:** Review decisions periodically as system evolves
@@ -559,5 +785,5 @@ Need API documentation that's automatically generated, maintainable, and provide
 
 ---
 
-*Last Updated: 2026-04-15*
-*Documentation Version: 1.0*
+_Last Updated: 2026-04-15_
+_Documentation Version: 1.0_
