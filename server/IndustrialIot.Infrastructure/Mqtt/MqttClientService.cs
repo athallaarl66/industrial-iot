@@ -9,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQTTnet;
+using IndustrialIot.Application.DTOs;
+using IndustrialIot.Application.Services;
 using MQTTnet.Client;
 
 namespace IndustrialIot.Infrastructure.Mqtt;
@@ -197,7 +199,7 @@ public class MqttClientService : IAsyncDisposable
             _logger.LogInformation("Saved telemetry for asset {AssetCode}: Temp={Temp}°C, EdgeTime={EdgeTime}",
                 assetCode, message.Temperature, telemetry.EdgeTimestamp);
 
-            await CheckAlertsAsync(asset, telemetry);
+            await CheckAlertsAsync(asset, telemetry, dbContext);
         }
         catch (Exception ex)
         {
@@ -205,29 +207,81 @@ public class MqttClientService : IAsyncDisposable
         }
     }
 
-    private async Task CheckAlertsAsync(Asset asset, Telemetry telemetry)
+    private async Task CheckAlertsAsync(Asset asset, Telemetry telemetry, AppDbContext dbContext)
     {
-        // TODO: Implement alert logic based on thresholds
-        // For now, just log if values are outside normal ranges
+        using var notifierScope = _scopeFactory.CreateScope();
+        var notifier = notifierScope.ServiceProvider.GetRequiredService<IndustrialIot.Application.Services.ITelemetryNotifier>();
+        // Update asset status based on thresholds
+        var previousStatus = asset.Status;
+        var alertMessage = "";
+
         if (telemetry.Temperature > 100)
         {
-            _logger.LogWarning("High temperature alert for asset {AssetCode}: {Temperature}°C",
-                asset.AssetCode, telemetry.Temperature);
+            asset.Status = AssetStatus.Critical;
+            alertMessage = $"High temperature: {telemetry.Temperature}°C";
+            _logger.LogWarning("CRITICAL: {Message} for asset {AssetCode}", alertMessage, asset.AssetCode);
         }
-
-        if (telemetry.Pressure > 500)
+        else if (telemetry.Temperature > 80)
         {
-            _logger.LogWarning("High pressure alert for asset {AssetCode}: {Pressure}PSI",
-                asset.AssetCode, telemetry.Pressure);
+            asset.Status = AssetStatus.Warning;
+            alertMessage = $"High temperature: {telemetry.Temperature}°C";
+            _logger.LogWarning("WARNING: {Message} for asset {AssetCode}", alertMessage, asset.AssetCode);
         }
-
-        if (telemetry.Vibration > 10)
+        else if (telemetry.Pressure > 500)
         {
-            _logger.LogWarning("High vibration alert for asset {AssetCode}: {Vibration}mm/s",
-                asset.AssetCode, telemetry.Vibration);
+            asset.Status = AssetStatus.Critical;
+            alertMessage = $"High pressure: {telemetry.Pressure} PSI";
+            _logger.LogWarning("CRITICAL: {Message} for asset {AssetCode}", alertMessage, asset.AssetCode);
+        }
+        else if (telemetry.Pressure > 400)
+        {
+            asset.Status = AssetStatus.Warning;
+            alertMessage = $"High pressure: {telemetry.Pressure} PSI";
+            _logger.LogWarning("WARNING: {Message} for asset {AssetCode}", alertMessage, asset.AssetCode);
+        }
+        else if (telemetry.Vibration > 10)
+        {
+            asset.Status = AssetStatus.Critical;
+            alertMessage = $"High vibration: {telemetry.Vibration} mm/s";
+            _logger.LogWarning("CRITICAL: {Message} for asset {AssetCode}", alertMessage, asset.AssetCode);
+        }
+        else if (telemetry.Vibration > 5)
+        {
+            asset.Status = AssetStatus.Warning;
+            alertMessage = $"High vibration: {telemetry.Vibration} mm/s";
+            _logger.LogWarning("WARNING: {Message} for asset {AssetCode}", alertMessage, asset.AssetCode);
+        }
+        else
+        {
+            asset.Status = AssetStatus.Running;
         }
 
-        await Task.CompletedTask;
+        // Save updated asset status
+        dbContext.Assets.Update(asset);
+        await dbContext.SaveChangesAsync();
+
+        if (asset.Status != previousStatus)
+        {
+            _logger.LogInformation("Asset {AssetCode} status changed from {Old} to {New}", asset.AssetCode, previousStatus, asset.Status);
+        }
+
+        // Send telemetry update
+        var updateDto = new IndustrialIot.Application.DTOs.TelemetryUpdateDto
+        {
+            AssetCode = asset.AssetCode,
+            Temperature = telemetry.Temperature,
+            Pressure = telemetry.Pressure,
+            Vibration = telemetry.Vibration,
+            Status = asset.Status.ToString(),
+            IngestionTimestamp = telemetry.IngestionTimestamp,
+            AlertMessage = string.IsNullOrEmpty(alertMessage) ? null : alertMessage
+        };
+        await notifier.PublishTelemetryUpdateAsync(updateDto);
+
+        if (!string.IsNullOrEmpty(alertMessage))
+        {
+            await notifier.PublishAlertAsync(asset.AssetCode, alertMessage, asset.Status.ToString());
+        }
     }
 
     public async Task StopAsync()

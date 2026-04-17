@@ -36,6 +36,7 @@ builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 
 // Register Services
 builder.Services.AddScoped<IAssetService, AssetService>();
+builder.Services.AddScoped<IndustrialIot.Application.Services.ITelemetryNotifier, IndustrialIot.Api.Services.TelemetryNotifier>();
 
 // Register MQTT Services
 builder.Services.Configure<MqttSettings>(
@@ -48,6 +49,7 @@ builder.Services.AddHealthChecks();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSignalR();
 
 // 4. Setup Swagger Documentation
 builder.Services.AddSwaggerGen(c =>
@@ -91,5 +93,7 @@ app.UseCors("FrontendCorsPolicy");
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
+
+app.MapHub<IndustrialIot.Api.Hubs.TelemetryHub>("/telemetryhub");
 
 app.Run();
