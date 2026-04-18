@@ -1,84 +1,104 @@
-# 📖 Operating Guide: How to use Industrial IoT Core
+# 📖 Operating Guide: Industrial IoT Core
 
-This guide provides a step-by-step walkthrough for initializing, provisioning, and monitoring assets within the Industrial IoT platform.
-
----
-
-## Step 1: Initialize the Infrastructure
-Before using the dashboard, ensuring the underlying data pipelines and database are operational:
-1. **Start Containers**: Ensure your Docker containers (Postgres & MQTT) are running:
-   ```bash
-   cd infra
-   docker-compose up -d
-   ```
-2. **Start Backend**: Launch the .NET API:
-   ```bash
-   cd server
-   dotnet run --project IndustrialIot.Api
-   ```
-3. **Start Frontend**: Launch the React dashboard:
-   ```bash
-   cd apps/web-dashboard
-   pnpm dev
-   ```
-
-## Step 2: Provision Industrial Assets
-1. Open the Dashboard at `http://localhost:5173/assets`.
-2. Use the **"Provision Node"** sidebar form to add your first hardware asset.
-   - **Schema**: Use a standardized code like `PMP-ZONE-001` (Type-Location-Serial).
-   - **Category**: Select the appropriate equipment type (Pump, Valve, etc.).
-3. Once authorized, the asset will appear in the **Hardware Inventory** registry with an "Awaiting Uplink" status.
-
-## Step 3: Trigger Live Telemetry via Simulator
-To simulate real field activity, use the included Node.js edge simulator:
-1. Open a new terminal.
-2. Run the simulator script:
-   ```bash
-   node scripts/mqtt-telemetry-simulator.js
-   ```
-This script acts as a virtual gateway, sending high-frequency sensor packets (temp, pressure, vibration) to the MQTT broker for each provisioned asset.
-
-## Step 4: Monitor the Command Center
-1. Navigate to the **"Command Center"** (Home Dashboard).
-2. **Aggregated Health**: Watch the KPI cards update as telemetry flows in:
-   - **Running**: Assets operating within safe parameters.
-   - **Warning**: Assets showing anomalies (e.g., rising vibration).
-   - **Critical**: Assets exceeding safety thresholds (requires immediate attention).
-3. **Health Index**: A percentage-based distribution of fleet health.
-4. **Active Fleet Deployment**: A visual grid representing your facility's digital twin.
-   > [!NOTE]
-   > The Fleet Grid is currently a visualization layer placeholder designed for future CAD/GIS integration.
-
-## Step 5: Understanding Alerts
-The system continuously monitors telemetry for threshold violations:
-1. **Real-time Detection**: The simulator will automatically trigger specific alert states if sensor values exceed pre-defined industrial bounds.
-2. **Alert Management Hub**: Navigate to the **Alerts** page to view the centralized feed.
-   > [!IMPORTANT]
-   > The "Alerts Management" module is currently being provisioned. While backend alerts are being logged, the centralized UI is in "Awaiting Uplink" status.
-
-## Step 6: Decommissioning Assets
-When a node is taken offline or moved:
-1. Go to the **Asset Registry** page.
-2. Locate the asset and click the **Delete/Bin** icon.
-3. Confirm the **Termination of Node Synchronization**. This safely removes the asset from the database and closes its specific real-time telemetry route.
+Welcome to the **Industrial IoT Core** operating manual. This document serves as a comprehensive guide for developers, system operators, and stakeholders to understand, deploy, and demonstrate the platform's capabilities.
 
 ---
 
-## 🛠️ Troubleshooting & FAQ
+## 🚀 1. Product Vision & Industry Context
 
-### 1. No data appearing on the Dashboard?
-- **Check MQTT Broker**: Ensure the `infra` containers are running (`docker ps`).
-- **Check Simulator**: Ensure the `node scripts/mqtt-telemetry-simulator.js` is active and showing "Packet Sent" logs.
-- **SignalR Connection**: Refresh the page; the dashboard uses active WebSockets which may timeout if the backend is restarted.
+### What is Industrial IoT Core?
+**Industrial IoT Core** is a next-generation "Digital Twin" and Asset Intelligence platform. It bridges the gap between raw edge sensor data and high-stakes operational decision-making. By capturing real-time telemetry, the system provides a "Bird's-eye view" of global fleet health.
 
-### 2. Assets stuck in "Awaiting Uplink"?
-- The asset is created in the database but hasn't received its first telemetry packet yet. Ensure the Simulator is running and the `AssetId` in the simulator matches the one provisioned.
+### 🏭 Industry Verticals
+This platform is designed for environments where equipment failure is not an option:
 
-### 3. Backend connection errors?
-- Verify the .NET API is running on `https://localhost:7053`. If you changed the port, update the `VITE_API_URL` in `apps/web-dashboard/.env`.
+*   **🛢️ Oil & Gas (O&G)**: Monitoring offshore drilling rigs, subsea pipelines, and refinery pumps.
+*   **🏭 Manufacturing**: Tracking the health of assembly line motors, industrial fans, and robotic arms.
+*   **⛏️ Mining**: Monitoring ventilation systems, heavy-duty conveyor belts, and massive crushing machines.
+*   **⚡ Renewable Energy**: Tracking vibrations in wind turbine bearings and thermal profiles of solar inverters.
+
+### ⚙️ Example Assets (Nodes)
+*   **Centrifugal Pumps**: Monitoring vibration, flow rate, and motor temperature to prevent "dry run" failures.
+*   **Industrial Compressors**: Tracking discharge pressure and power consumption for energy optimization.
+*   **Electric Motors**: Real-time analysis of torque and bearing health to predict maintenance cycles.
+
+---
+
+## 🏗️ 2. System Architecture
+
+The platform follows a "Decoupled Pillar" architecture:
+
+1.  **The Edge (Simulator)**: Acts as the physical machine. It generates sensor packets (JSON) and sends them via the MQTT protocol.
+2.  **The Broker (Mosquitto)**: The "Postal Service" that routes data between the Edge and the Backend.
+3.  **The Brain (.NET API)**: Subscribes to telemetry, applies business logic (threshold checks), and persists data to PostgreSQL.
+4.  **The Command Center (React UI)**: Displays live health status via **SignalR (WebSockets)** for sub-second synchronization.
+
+---
+
+## 🏁 3. Quick-Start Demo (5-Minute Walkthrough)
+
+To demonstrate the platform to a stakeholder, follow this terminal orchestration:
+
+### Step A: Start the Engine (Infrastructure)
+```powershell
+# Terminal 1
+cd infra
+docker-compose up -d
+```
+
+### Step B: Launch the Brain & UI
+```powershell
+# Terminal 2 - Backend
+cd server
+dotnet run --project IndustrialIot.Api
+
+# Terminal 3 - Frontend
+cd apps/web-dashboard
+pnpm dev
+```
+> **Action**: Open browser to `http://localhost:5173`.
+
+### Step C: Trigger the Simulation
+```powershell
+# Terminal 4 - Simulation
+node scripts/mqtt-telemetry-simulator.js
+```
+> **Result**: Watch the **Command Center** cards and the **Activity Feed** update automatically as sensor data arrives!
+
+---
+
+## 🛠️ 4. Feature Deep-Dive
+
+### 📂 Asset Provisioning (Registry)
+Before a machine can send data, it must be "Provisioned" in the registry:
+1.  Navigate to the **Assets** page.
+2.  Use the **Provision Node** form to register a new ID (e.g., `PMP-001`).
+3.  The system will generate a secure identity for the node.
+
+### 📊 Health Index & KPI Cards
+*   **🟢 Running**: Machine is healthy and within standard operating baselines.
+*   **🟡 Warning**: Anomalous data detected (e.g., vibration > 5.0mm/s). Action is recommended.
+*   **🔴 Critical**: Threshold violation (e.g., temperature > 90°C). Immediate inspection required.
+
+### 🛡️ Alert Management
+The system automatically logs every threshold violation.
+> [!NOTE]
+> The **Alerts Hub** UI is currently in "Awaiting Uplink" status. While backend alerts are functional and stored in the database, the dedicated management dashboard is being provisioned for the next release.
+
+---
+
+## 🔧 5. Troubleshooting & FAQ
+
+**Q: I don't see any data in the dashboard.**
+> **A**: Verify that the Simulator is running. Check the simulator logs for `[MQTT] Packet Sent`. Ensure the Asset ID in the simulator exists in your dashboard's registry.
+
+**Q: The Dashboard says "Disconnected" or "Retrying".**
+> **A**: Ensure the .NET Backend is running. The UI relies on a SignalR connection to the API at `https://localhost:7053`.
+
+**Q: Docker containers won't start.**
+> **A**: Ensure Port 5433 (Postgres) and Port 1883 (MQTT) are not being used by other local applications.
 
 ---
 
 > [!TIP]
-> Always ensure the Simulator is running if you want to see the Dashboard shift states in real-time. Without active telemetry, the system will maintain its "Last Known State".
-
+> This platform is built for scale. You can run hundreds of simulators simultaneously to test the high-throughput ingestion engine of the .NET backend.
