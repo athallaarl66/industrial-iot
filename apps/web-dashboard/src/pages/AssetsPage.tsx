@@ -6,9 +6,18 @@ import { DeleteDialog } from "../components/DeleteDialog";
 export function AssetsPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  /**
+   * Proper state management: trigger refresh without page reload
+   * This forces components to re-fetch data from API
+   */
+  const refreshAssets = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const handleAssetCreated = () => {
-    window.location.reload();
+    refreshAssets();
   };
 
   const handleDelete = (id: string) => {
@@ -25,7 +34,7 @@ export function AssetsPage() {
         method: "DELETE",
       });
       if (response.ok) {
-        window.location.reload();
+        refreshAssets();
       }
     } catch {
       console.error("Delete failed");
@@ -43,7 +52,7 @@ export function AssetsPage() {
         </div>
         <div className="lg:col-span-2">
           <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-xl p-8 border border-gray-100">
-            <AssetList onDelete={handleDelete} />
+            <AssetList onDelete={handleDelete} refreshTrigger={refreshTrigger} />
           </div>
         </div>
       </div>

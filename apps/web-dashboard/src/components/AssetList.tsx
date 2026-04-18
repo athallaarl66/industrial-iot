@@ -5,16 +5,17 @@ import { signalRService } from "../services/signalr";
 
 interface AssetListProps {
   onDelete: (id: string) => void;
+  refreshTrigger?: number;
 }
 
-export function AssetList({ onDelete }: AssetListProps) {
+export function AssetList({ onDelete, refreshTrigger }: AssetListProps) {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadAssets();
-  }, []);
+  }, [refreshTrigger]);
 
   const updateAsset = useCallback((update: TelemetryUpdate) => {
     setAssets((prevAssets) =>
@@ -69,7 +70,7 @@ export function AssetList({ onDelete }: AssetListProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadAssets = async () => {
+  const loadAssets = useCallback(async () => {
     try {
       setLoading(true);
       const response = await apiService.getAssets();
@@ -84,7 +85,7 @@ export function AssetList({ onDelete }: AssetListProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [refreshTrigger]);
 
   const handleDeleteClick = (id: string) => {
     onDelete(id);
