@@ -3,7 +3,11 @@ import type { Asset, TelemetryUpdate } from "../types";
 import { apiService } from "../services/api";
 import { signalRService } from "../services/signalr";
 
-export function AssetList() {
+interface AssetListProps {
+  onDelete: (id: string) => void;
+}
+
+export function AssetList({ onDelete }: AssetListProps) {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,19 +85,8 @@ export function AssetList() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this asset?")) return;
-
-    try {
-      const response = await apiService.deleteAsset(id);
-      if (response.success) {
-        loadAssets(); // Reload the list
-      } else {
-        setError(response.message || "Failed to delete asset");
-      }
-    } catch (err) {
-      setError("An error occurred while deleting asset");
-    }
+  const handleDeleteClick = (id: string) => {
+    onDelete(id);
   };
 
   const getStatusColor = (status: string) => {
@@ -235,7 +228,7 @@ export function AssetList() {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button
-                  onClick={() => handleDelete(asset.id)}
+                  onClick={() => handleDeleteClick(asset.id)}
                   className="text-red-600 hover:text-red-900"
                 >
                   Delete
