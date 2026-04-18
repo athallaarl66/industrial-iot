@@ -81,4 +81,15 @@ public class AssetsController : ControllerBase
 
         return Ok(response);
     }
+
+    /// <summary>
+    /// Mengambil data histori telemetri untuk Asset tertentu.
+    /// </summary>
+    [HttpGet("{id:guid}/telemetry")]
+    [ProducesResponseType(typeof(ApiResponse<List<IndustrialIot.Application.DTOs.Telemetry.TelemetryHistoryDto>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetTelemetryHistory(Guid id, [FromQuery] int limit = 50, CancellationToken cancellationToken = default)
+    {
+        var response = await _assetService.GetTelemetryHistoryAsync(id, limit, cancellationToken);
+        return Ok(response);
+    }
 }

@@ -60,4 +60,5 @@ Thumbs.db
 # ==========================================
 .claude/
 openspec/
+.agent/
 # docs/Rule_manager.md

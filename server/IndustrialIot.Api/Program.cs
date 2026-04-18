@@ -34,6 +34,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateAssetValidator>();
 // Register Repositories
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IAlertRepository, AlertRepository>();
+builder.Services.AddScoped<ITelemetryRepository, TelemetryRepository>();
 
 // Register Services
 builder.Services.AddScoped<IAssetService, AssetService>();

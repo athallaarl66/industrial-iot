@@ -4,17 +4,20 @@ using IndustrialIot.Application.Repositories;
 using IndustrialIot.Domain.Entities;
 using IndustrialIot.Domain.Enums;
 using Microsoft.Extensions.Logging;
+using IndustrialIot.Application.DTOs.Telemetry;
 
 namespace IndustrialIot.Application.Services;
 
 public class AssetService : IAssetService
 {
     private readonly IAssetRepository _assetRepository;
+    private readonly ITelemetryRepository _telemetryRepository;
     private readonly ILogger<AssetService> _logger;
 
-    public AssetService(IAssetRepository assetRepository, ILogger<AssetService> logger)
+    public AssetService(IAssetRepository assetRepository, ITelemetryRepository telemetryRepository, ILogger<AssetService> logger)
     {
         _assetRepository = assetRepository;
+        _telemetryRepository = telemetryRepository;
         _logger = logger;
     }
 
@@ -105,5 +108,20 @@ public class AssetService : IAssetService
 
         await _assetRepository.DeleteAsync(asset, cancellationToken);
         return ApiResponse<bool>.Ok(true, "Aset berhasil dihapus secara permanen.");
+    }
+
+    public async Task<ApiResponse<List<TelemetryHistoryDto>>> GetTelemetryHistoryAsync(Guid assetId, int limit = 50, CancellationToken cancellationToken = default)
+    {
+        var history = await _telemetryRepository.GetHistoryByAssetIdAsync(assetId, limit, cancellationToken);
+        
+        var result = history.Select(t => new TelemetryHistoryDto
+        {
+            Temperature = t.Temperature,
+            Pressure = t.Pressure,
+            Vibration = t.Vibration,
+            Timestamp = t.EdgeTimestamp
+        }).ToList();
+
+        return ApiResponse<List<TelemetryHistoryDto>>.Ok(result, "Berhasil mengambil riwayat telemetri.");
     }
 }
