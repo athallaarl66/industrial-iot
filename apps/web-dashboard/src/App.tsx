@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { Dashboard } from "./components/Dashboard";
 import { AssetsPage } from "./pages/AssetsPage";
+import AssetDigitalTwin from "./pages/AssetDigitalTwin";
 
 /**
  * Main Application Component
@@ -15,6 +16,7 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/assets" element={<AssetsPage />} />
+          <Route path="/assets/:id" element={<AssetDigitalTwin />} />
           <Route path="/alerts" element={
             <div className="flex flex-col items-center justify-center h-[60vh] text-center">
               <div className="w-24 h-24 bg-white rounded-3xl border border-slate-100 shadow-sm flex items-center justify-center mb-8">

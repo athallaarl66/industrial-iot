@@ -74,6 +74,10 @@ class ApiService {
     });
   }
 
+  async getTelemetryHistory(id: string, limit: number = 50): Promise<ApiResponse<import('../types').TelemetryHistoryEntry[]>> {
+    return this.request<import('../types').TelemetryHistoryEntry[]>(`/assets/${id}/telemetry?limit=${limit}`);
+  }
+
   /**
    * Get API base URL from config
    */

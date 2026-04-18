@@ -1,0 +1,174 @@
+import { useEffect, useState, useCallback } from "react";
+import { useParams, Link } from "react-router-dom";
+import { apiService } from "../services/api";
+import { signalRService } from "../services/signalr";
+import type { Asset, TelemetryHistoryEntry, TelemetryUpdate } from "../types";
+import { HistoryChart } from "../components/assets/HistoryChart";
+
+/**
+ * AssetDigitalTwin Page
+ * High-fidelity real-time visualization of a single asset.
+ * Orchestrates live SignalR data with historical trends.
+ */
+export default function AssetDigitalTwin() {
+  const { id } = useParams<{ id: string }>();
+  const [asset, setAsset] = useState<Asset | null>(null);
+  const [history, setHistory] = useState<TelemetryHistoryEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadData = useCallback(async () => {
+    if (!id) return;
+    try {
+      setLoading(true);
+      const [assetRes, historyRes] = await Promise.all([
+        apiService.getAssetById(id),
+        apiService.getTelemetryHistory(id, 50)
+      ]);
+
+      if (assetRes.success) setAsset(assetRes.data);
+      if (historyRes.success) setHistory(historyRes.data);
+    } catch (err) {
+      console.error("[DigitalTwin] Failed to load data:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    const handleUpdate = (update: TelemetryUpdate) => {
+      if (asset && asset.assetCode === update.assetCode) {
+        // Update live metrics
+        setAsset((prev) => prev ? ({
+          ...prev,
+          status: update.status as Asset["status"],
+          temperature: update.temperature,
+          pressure: update.pressure,
+          vibration: update.vibration
+        }) : null);
+
+        // Append to history for real-time chart update
+        setHistory((prev) => {
+          const newEntry: TelemetryHistoryEntry = {
+            temperature: update.temperature,
+            pressure: update.pressure,
+            vibration: update.vibration,
+            timestamp: update.ingestionTimestamp
+          };
+          return [...prev.slice(1), newEntry]; // Maintain window size
+        });
+      }
+    };
+
+    signalRService.on("onTelemetryUpdate", handleUpdate);
+    return () => {
+      // Cleanup managed by signalRService
+    };
+  }, [asset]);
+
+  if (loading) {
+    return (
+      <div className="p-8 flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Syncing Digital Twin...</p>
+      </div>
+    );
+  }
+
+  if (!asset) {
+    return (
+      <div className="p-8 text-center mt-20">
+        <h2 className="text-2xl font-black text-slate-900 mb-4">ASSET NOT FOUND</h2>
+        <Link to="/" className="text-blue-600 font-bold hover:underline">Return to Command Center</Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-8 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Link to="/" className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400">
+               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+               </svg>
+            </Link>
+            <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Digital Twin / {asset.assetCode}</span>
+          </div>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">{asset.name}</h1>
+          <p className="text-slate-500 font-medium mt-1 uppercase text-xs tracking-tighter">
+            Location: <span className="text-slate-900 font-bold">{asset.location}</span> • Type: <span className="text-slate-900 font-bold">{asset.type}</span>
+          </p>
+        </div>
+
+        <div className={`
+           px-6 py-3 rounded-2xl border-2 flex items-center gap-4
+           ${asset.status === 'Running' ? 'bg-emerald-50 border-emerald-500/20 text-emerald-700' : 
+             asset.status === 'Critical' ? 'bg-rose-50 border-rose-500/20 text-rose-700 animate-pulse' : 
+             'bg-amber-50 border-amber-500/20 text-amber-700'}
+        `}>
+          <div className={`w-3 h-3 rounded-full bg-current`}></div>
+          <span className="font-black uppercase tracking-widest text-sm">{asset.status}</span>
+        </div>
+      </div>
+
+      {/* Real-time Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div className="industrial-panel p-6 bg-white">
+           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Live Temperature</span>
+           <div className="flex items-baseline gap-2">
+             <span className="text-4xl font-black text-slate-900">{asset.temperature?.toFixed(1) ?? "--"}</span>
+             <span className="text-lg font-bold text-slate-400 italic">°C</span>
+           </div>
+        </div>
+        <div className="industrial-panel p-6 bg-white">
+           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Live Pressure</span>
+           <div className="flex items-baseline gap-2">
+             <span className="text-4xl font-black text-slate-900">{asset.pressure?.toFixed(1) ?? "--"}</span>
+             <span className="text-lg font-bold text-slate-400 italic">PSI</span>
+           </div>
+        </div>
+        <div className="industrial-panel p-6 bg-white">
+           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Live Vibration</span>
+           <div className="flex items-baseline gap-2">
+             <span className="text-4xl font-black text-slate-900">{asset.vibration?.toFixed(1) ?? "--"}</span>
+             <span className="text-lg font-bold text-slate-400 italic">mm/s</span>
+           </div>
+        </div>
+      </div>
+
+      {/* Historical Charts */}
+      <h2 className="text-sm font-black text-slate-400 uppercase tracking-[0.3em] mb-6">Telemetry Analytics Stream</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <HistoryChart 
+          data={history} 
+          title="Temperature History" 
+          dataKey="temperature" 
+          color="#10b981" 
+          unit="°C" 
+        />
+        <HistoryChart 
+          data={history} 
+          title="Pressure History" 
+          dataKey="pressure" 
+          color="#f59e0b" 
+          unit="PSI" 
+        />
+        <div className="lg:col-span-2">
+          <HistoryChart 
+            data={history} 
+            title="Vibration Profile" 
+            dataKey="vibration" 
+            color="#ec4899" 
+            unit="mm/s" 
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

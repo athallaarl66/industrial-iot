@@ -40,3 +40,10 @@ export interface TelemetryUpdate {
   ingestionTimestamp: string;
   alertMessage?: string;
 }
+
+export interface TelemetryHistoryEntry {
+  temperature: number;
+  pressure: number;
+  vibration: number;
+  timestamp: string;
+}
