@@ -7,20 +7,23 @@ Welcome to the **Industrial IoT Core** operating manual. This document serves as
 ## 🚀 1. Product Vision & Industry Context
 
 ### What is Industrial IoT Core?
+
 **Industrial IoT Core** is a next-generation "Digital Twin" and Asset Intelligence platform. It bridges the gap between raw edge sensor data and high-stakes operational decision-making. By capturing real-time telemetry, the system provides a "Bird's-eye view" of global fleet health.
 
 ### 🏭 Industry Verticals
+
 This platform is designed for environments where equipment failure is not an option:
 
-*   **🛢️ Oil & Gas (O&G)**: Monitoring offshore drilling rigs, subsea pipelines, and refinery pumps.
-*   **🏭 Manufacturing**: Tracking the health of assembly line motors, industrial fans, and robotic arms.
-*   **⛏️ Mining**: Monitoring ventilation systems, heavy-duty conveyor belts, and massive crushing machines.
-*   **⚡ Renewable Energy**: Tracking vibrations in wind turbine bearings and thermal profiles of solar inverters.
+- **🛢️ Oil & Gas (O&G)**: Monitoring offshore drilling rigs, subsea pipelines, and refinery pumps.
+- **🏭 Manufacturing**: Tracking the health of assembly line motors, industrial fans, and robotic arms.
+- **⛏️ Mining**: Monitoring ventilation systems, heavy-duty conveyor belts, and massive crushing machines.
+- **⚡ Renewable Energy**: Tracking vibrations in wind turbine bearings and thermal profiles of solar inverters.
 
 ### ⚙️ Example Assets (Nodes)
-*   **Centrifugal Pumps**: Monitoring vibration, flow rate, and motor temperature to prevent "dry run" failures.
-*   **Industrial Compressors**: Tracking discharge pressure and power consumption for energy optimization.
-*   **Electric Motors**: Real-time analysis of torque and bearing health to predict maintenance cycles.
+
+- **Centrifugal Pumps**: Monitoring vibration, flow rate, and motor temperature to prevent "dry run" failures.
+- **Industrial Compressors**: Tracking discharge pressure and power consumption for energy optimization.
+- **Electric Motors**: Real-time analysis of torque and bearing health to predict maintenance cycles.
 
 ---
 
@@ -40,6 +43,7 @@ The platform follows a "Decoupled Pillar" architecture:
 To demonstrate the platform to a stakeholder, follow this terminal orchestration:
 
 ### Step A: Start the Engine (Infrastructure)
+
 ```powershell
 # Terminal 1
 cd infra
@@ -47,6 +51,7 @@ docker-compose up -d
 ```
 
 ### Step B: Launch the Brain & UI
+
 ```powershell
 # Terminal 2 - Backend
 cd server
@@ -54,16 +59,19 @@ dotnet run --project IndustrialIot.Api/IndustrialIot.Api.csproj
 
 # Terminal 3 - Frontend
 cd apps/web-dashboard
-pnpm dev
+npm run dev
 ```
+
 > **Action**: Open browser to `http://localhost:5173`.
 
 ### Step C: Trigger the Simulation
+
 ```powershell
 # Terminal 4 - Simulation
 cd scripts
 node mqtt-telemetry-simulator.js
 ```
+
 > **Result**: Watch the **Command Center** cards and the **Activity Feed** update automatically as sensor data arrives!
 > [!IMPORTANT]
 > The simulator now fetches assets dynamically. Ensure the **Backend (Brain)** is running before starting the simulator to enable auto-discovery of your custom assets.
@@ -73,24 +81,31 @@ node mqtt-telemetry-simulator.js
 ## 🛠️ 4. Feature Deep-Dive
 
 ### 📂 4.1. Asset Provisioning (Registry)
+
 Before a machine can send data, it must be "Provisioned" in the registry:
+
 1.  Navigate to the **Assets** page.
 2.  Use the **Provision Node** form to register a new ID (e.g., `PMP-A-001`).
 3.  The system will generate a secure identity for the node.
 
 ### 📊 4.2. Health Index & KPI Cards
-*   **🟢 Running**: Machine is healthy and within standard operating baselines.
-*   **🟡 Warning**: Anomalous data detected (e.g., vibration > 5.0mm/s). Action is recommended.
-*   **🔴 Critical**: Threshold violation (e.g., temperature > 90°C). Immediate inspection required.
+
+- **🟢 Running**: Machine is healthy and within standard operating baselines.
+- **🟡 Warning**: Anomalous data detected (e.g., vibration > 5.0mm/s). Action is recommended.
+- **🔴 Critical**: Threshold violation (e.g., temperature > 90°C). Immediate inspection required.
 
 ### 📈 4.3. Digital Twin & Analytics Stream
+
 Every asset is paired with its **Digital Twin Dashboard**:
+
 1.  **Selection**: Click on any asset card from the main dashboard.
 2.  **Live Telemetry**: View real-time temperature, pressure, and vibration profiles synced via SignalR.
 3.  **Historical Trends**: Analyze the last 50 data points using high-fidelity Area Charts. Use this to identify degradation patterns before they trigger a `Critical` status.
 
 ### 🛡️ 4.4. Alert Management
+
 The system automatically logs every threshold violation.
+
 > [!NOTE]
 > The **Alerts Hub** UI is currently in "Awaiting Uplink" status. While backend alerts are functional and stored in the database, the dedicated management dashboard is being provisioned for the next release.
 
@@ -101,13 +116,17 @@ The system automatically logs every threshold violation.
 The system uses Entity Framework Core (EF) for schema management. We've provided helper scripts to simplify these operations:
 
 ### 🚀 Update Database
+
 Applies all pending migrations to the live PostgreSQL instance.
+
 ```powershell
 ./scripts/db-update.ps1
 ```
 
 ### 🏗️ Create New Migration
+
 Generates a new migration file after you've modified the Domain/Infrastructure models.
+
 ```powershell
 ./scripts/db-migrate.ps1 -Name "DescriptionOfChange"
 ```
@@ -117,12 +136,15 @@ Generates a new migration file after you've modified the Domain/Infrastructure m
 ## 🔧 6. Troubleshooting & FAQ
 
 **Q: I don't see any data in the dashboard.**
+
 > **A**: Verify that the Simulator is running. Check the simulator logs for `[MQTT] Packet Sent`. Ensure the Asset ID in the simulator exists in your dashboard's registry.
 
 **Q: The Dashboard says "Disconnected" or "Retrying".**
+
 > **A**: Ensure the .NET Backend is running. The UI relies on a SignalR connection to the API at `https://localhost:7053`.
 
 **Q: Docker containers won't start.**
+
 > **A**: Ensure Port 5433 (Postgres) and Port 1883 (MQTT) are not being used by other local applications.
 
 ---
