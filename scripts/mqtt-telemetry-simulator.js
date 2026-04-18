@@ -1,48 +1,118 @@
 const mqtt = require("mqtt");
 
-const options = {
+/**
+ * CONFIGURATION
+ */
+const MQTT_OPTIONS = {
   host: "localhost",
   port: 1883,
   username: "backend_service",
   password: "backend_secure_passwd_2026",
-  clientId: "telemetry-simulator",
+  clientId: `telemetry-simulator-${Math.random().toString(16).substring(2, 8)}`,
 };
 
-const client = mqtt.connect(options);
+const API_BASE_URL = "http://localhost:5234/api/v1";
+const SYNC_INTERVAL_MS = 60000; // Refetch assets every 1 minute
+const PUBLISH_INTERVAL_MS = 3000; // Publish telemetry every 3 seconds per asset (staggered)
 
-const assets = ["PMP-A-001", "WH-B-015", "CMP-C-123"];
+// Fallback assets if API is unreachable
+const FALLBACK_ASSETS = ["PMP-A-001", "WH-B-015", "CMP-C-123", "PMP-BDG-001"];
 
-client.on("connect", () => {
-  console.log("Connected to MQTT broker");
-  console.log("Publishing sample telemetry every 5 seconds...");
-  console.log("Press Ctrl+C to stop");
+let activeAssets = [...FALLBACK_ASSETS];
+let client = null;
 
-  setInterval(() => {
-    const assetCode = assets[Math.floor(Math.random() * assets.length)];
-    const temp = (Math.random() * 20 + 60).toFixed(2); // 60-80°C
-    const pressure = (Math.random() * 100 + 300).toFixed(2); // 300-400 PSI
-    const vibration = (Math.random() * 5 + 1).toFixed(2); // 1-6 mm/s
-
-    const payload = {
-      assetCode,
-      temperature: parseFloat(temp),
-      pressure: parseFloat(pressure),
-      vibration: parseFloat(vibration),
-      timestamp: new Date().toISOString(),
-    };
-
-    const topic = `iot/telemetry/${assetCode}`;
-
-    client.publish(topic, JSON.stringify(payload), (err) => {
-      if (err) {
-        console.error("Publish error:", err);
-      } else {
-        console.log(`Published to ${topic}:`, payload);
+/**
+ * Fetch registered assets from the Backend API
+ */
+async function fetchAssets() {
+  try {
+    console.log("🔄 Syncing asset registry from API...");
+    const response = await fetch(`${API_BASE_URL}/assets`);
+    
+    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+    
+    const result = await response.json();
+    if (result.success && Array.isArray(result.data)) {
+      const codes = result.data.map(a => a.assetCode);
+      if (codes.length > 0) {
+        activeAssets = codes;
+        console.log(`✅ Registry synced. Monitoring ${activeAssets.length} nodes: [${activeAssets.join(", ")}]`);
+        return;
       }
-    });
-  }, 5000);
+    }
+    throw new Error("Invalid API response format");
+  } catch (err) {
+    console.warn(`⚠️ API Link offline (${err.message}). Using fallback registry.`);
+    activeAssets = [...FALLBACK_ASSETS];
+  }
+}
+
+/**
+ * Generate synthetic industrial telemetry
+ */
+function generateTelemetry(assetCode) {
+  return {
+    assetCode,
+    temperature: parseFloat((Math.random() * 20 + 65).toFixed(2)), // 65-85°C
+    pressure: parseFloat((Math.random() * 50 + 350).toFixed(2)),   // 350-400 PSI
+    vibration: parseFloat((Math.random() * 4 + 1).toFixed(2)),     // 1-5 mm/s
+    timestamp: new Date().toISOString(),
+  };
+}
+
+/**
+ * Start the simulation loop
+ */
+async function startSimulation() {
+  console.log("🚀 Industrial IoT Telemetry Simulator Starting...");
+  
+  // Initial sync
+  await fetchAssets();
+
+  // Connect to MQTT Broker
+  client = mqtt.connect(MQTT_OPTIONS);
+
+  client.on("connect", () => {
+    console.log("📡 Connected to MQTT Broker");
+    
+    // Set up periodic sync
+    setInterval(fetchAssets, SYNC_INTERVAL_MS);
+
+    // Staggered Publishing Loop
+    // To prevent "heavy" load, we rotate through assets one by one
+    let currentIndex = 0;
+    
+    setInterval(() => {
+      if (activeAssets.length === 0) return;
+
+      const assetCode = activeAssets[currentIndex];
+      const payload = generateTelemetry(assetCode);
+      const topic = `iot/telemetry/${assetCode}`;
+
+      client.publish(topic, JSON.stringify(payload), { qos: 0 }, (err) => {
+        if (err) {
+          console.error(`❌ [${assetCode}] Publish failed:`, err.message);
+        } else {
+          console.log(`📤 [${assetCode}] Published: Temp=${payload.temperature}°C, Pres=${payload.pressure}PSI`);
+        }
+      });
+
+      // Move to next asset
+      currentIndex = (currentIndex + 1) % activeAssets.length;
+    }, PUBLISH_INTERVAL_MS / activeAssets.length); // Dynamic stagger based on asset count
+    
+    console.log(`⏱️  Telemetry cadence: 1 update every ${Math.round(PUBLISH_INTERVAL_MS / activeAssets.length)}ms`);
+    console.log("Press Ctrl+C to shutdown.");
+  });
+
+  client.on("error", (err) => {
+    console.error("🚨 MQTT Client Error:", err.message);
+  });
+}
+
+// Global Rejection Handler
+process.on("unhandledRejection", (reason) => {
+  console.error("🔥 Critical Error:", reason);
 });
 
-client.on("error", (err) => {
-  console.error("MQTT error:", err);
-});
+startSimulation();
