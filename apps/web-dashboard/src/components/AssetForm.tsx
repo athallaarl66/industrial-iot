@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import type { CreateAssetForm } from '../types';
-import { apiService } from '../services/api';
+import { useState } from "react";
+import type { CreateAssetForm } from "../types";
+import { apiService } from "../services/api";
 
 interface AssetFormProps {
   onSuccess: () => void;
@@ -8,10 +8,10 @@ interface AssetFormProps {
 
 export function AssetForm({ onSuccess }: AssetFormProps) {
   const [formData, setFormData] = useState<CreateAssetForm>({
-    assetCode: '',
-    name: '',
-    type: '',
-    location: '',
+    assetCode: "",
+    name: "",
+    type: "",
+    location: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,15 +21,20 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
     setError(null);
 
     // Basic validation
-    if (!formData.assetCode || !formData.name || !formData.type || !formData.location) {
-      setError('All fields are required');
+    if (
+      !formData.assetCode ||
+      !formData.name ||
+      !formData.type ||
+      !formData.location
+    ) {
+      setError("All fields are required");
       return;
     }
 
     // Validate asset code format (O&G standard)
     const assetCodeRegex = /^[A-Z]{2,4}-[A-Z0-9]+-[0-9]{3,4}$/;
     if (!assetCodeRegex.test(formData.assetCode)) {
-      setError('Asset code must follow O&G format (e.g., PMP-A-001)');
+      setError("Asset code must follow O&G format (e.g., PMP-A-001)");
       return;
     }
 
@@ -39,30 +44,34 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
       if (response.success) {
         // Reset form
         setFormData({
-          assetCode: '',
-          name: '',
-          type: '',
-          location: '',
+          assetCode: "",
+          name: "",
+          type: "",
+          location: "",
         });
         onSuccess(); // Refresh the list
       } else {
-        setError(response.message || 'Failed to create asset');
+        setError(response.message || "Failed to create asset");
       }
-    } catch (err) {
-      setError('An error occurred while creating asset');
+    } catch {
+      setError("An error occurred while creating asset");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
     <div className="bg-white shadow rounded-lg p-6">
-      <h2 className="text-lg font-medium text-gray-900 mb-4">Create New Asset</h2>
+      <h2 className="text-lg font-medium text-gray-900 mb-4">
+        Create New Asset
+      </h2>
 
       {error && (
         <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
@@ -72,7 +81,10 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="assetCode" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="assetCode"
+            className="block text-sm font-medium text-gray-700"
+          >
             Asset Code *
           </label>
           <input
@@ -91,7 +103,10 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
         </div>
 
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700"
+          >
             Asset Name *
           </label>
           <input
@@ -107,7 +122,10 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
         </div>
 
         <div>
-          <label htmlFor="type" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="type"
+            className="block text-sm font-medium text-gray-700"
+          >
             Asset Type *
           </label>
           <select
@@ -130,7 +148,10 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
         </div>
 
         <div>
-          <label htmlFor="location" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="location"
+            className="block text-sm font-medium text-gray-700"
+          >
             Location *
           </label>
           <input
@@ -151,7 +172,7 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
             disabled={loading}
             className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creating...' : 'Create Asset'}
+            {loading ? "Creating..." : "Create Asset"}
           </button>
         </div>
       </form>

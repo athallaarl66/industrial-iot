@@ -56,8 +56,8 @@ export function AssetList({ onDelete }: AssetListProps) {
         );
 
         assets.forEach((asset) => signalRService.joinAsset(asset.assetCode));
-      } catch (err) {
-        console.error("SignalR connection failed:", err);
+      } catch {
+        console.error("SignalR connection failed");
       }
     };
 
@@ -66,6 +66,7 @@ export function AssetList({ onDelete }: AssetListProps) {
     return () => {
       signalRService.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadAssets = async () => {
@@ -78,7 +79,7 @@ export function AssetList({ onDelete }: AssetListProps) {
       } else {
         setError(response.message || "Failed to load assets");
       }
-    } catch (err) {
+    } catch {
       setError("An error occurred while loading assets");
     } finally {
       setLoading(false);

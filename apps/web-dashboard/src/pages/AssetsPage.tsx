@@ -27,7 +27,7 @@ export function AssetsPage() {
       if (response.ok) {
         window.location.reload();
       }
-    } catch (err) {
+    } catch {
       console.error("Delete failed");
     } finally {
       setShowDeleteDialog(false);

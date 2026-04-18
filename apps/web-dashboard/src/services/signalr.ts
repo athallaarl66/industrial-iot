@@ -26,12 +26,11 @@ export class SignalRService {
       this.callbacks.onTelemetryUpdate?.(update);
     });
 
-    this.connection.on(
-      "AlertUpdate",
-      (data: { assetCode: string; message: string; severity: string }) => {
-        this.callbacks.onAlert?.(data);
-      },
-    );
+    this.connection.on("AlertUpdate", (data: Record<string, unknown>) => {
+      this.callbacks.onAlert?.(
+        data as { assetCode: string; message: string; severity: string },
+      );
+    });
 
     this.connection.onclose(() => {
       console.log("SignalR connection closed. Attempting reconnect...");
@@ -45,7 +44,8 @@ export class SignalRService {
     event: keyof SignalREvents,
     callback: SignalREvents[keyof SignalREvents],
   ): void {
-    (this.callbacks as any)[event] = callback;
+    (this.callbacks as Record<string, (...args: any[]) => void>)[event] =
+      callback;
   }
 
   async joinAsset(assetCode: string): Promise<void> {
