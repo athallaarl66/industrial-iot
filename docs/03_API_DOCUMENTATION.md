@@ -268,7 +268,34 @@ interface CreateAssetDto {
 
 ### Telemetry Management
 - `POST /api/v1/telemetry` - Manual telemetry data ingestion
-- `GET /api/v1/telemetry/{assetId}` - Get asset telemetry history
+#### GET /api/v1/assets/{id}/telemetry
+Get historical telemetry for specific asset.
+
+**Parameters:**
+- `id` (UUID, path parameter) - Asset identifier
+- `limit` (int, query parameter) - Max records to return (default: 50)
+
+**Response:** `ApiResponse<List<TelemetryHistoryDto>>`
+```json
+{
+  "success": true,
+  "message": "Berhasil mengambil riwayat telemetri.",
+  "data": [
+    {
+      "temperature": 85.5,
+      "pressure": 350.2,
+      "vibration": 2.5,
+      "timestamp": "2026-04-18T10:30:00Z"
+    }
+  ],
+  "errorCode": null
+}
+```
+
+---
+
+### Telemetry Management (Planned)
+- `POST /api/v1/telemetry` - Manual telemetry data ingestion
 - `GET /api/v1/telemetry/{assetId}/latest` - Get latest telemetry data
 
 ### Alert Management

@@ -169,10 +169,10 @@ public class MqttClientService : IAsyncDisposable
 
         try
         {
-            // Extract asset ID from topic (format: telemetry/{assetId})
+            // Extract asset ID from topic (format: iot/telemetry/{assetCode})
             var topic = message.RawTopic ?? string.Empty;
             var topicParts = topic.Split('/');
-            var assetCode = topicParts.Length > 1 ? topicParts[1] : message.AssetCode ?? "unknown";
+            var assetCode = topicParts.Length > 2 ? topicParts[2] : message.AssetCode ?? "unknown";
 
             // Find asset by code
             var asset = await dbContext.Assets

@@ -50,7 +50,7 @@ docker-compose up -d
 ```powershell
 # Terminal 2 - Backend
 cd server
-dotnet run --project IndustrialIot.Api
+dotnet run --project IndustrialIot.Api/IndustrialIot.Api.csproj
 
 # Terminal 3 - Frontend
 cd apps/web-dashboard

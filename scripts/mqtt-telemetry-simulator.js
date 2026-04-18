@@ -31,7 +31,7 @@ client.on("connect", () => {
       timestamp: new Date().toISOString(),
     };
 
-    const topic = `telemetry/${assetCode}`;
+    const topic = `iot/telemetry/${assetCode}`;
 
     client.publish(topic, JSON.stringify(payload), (err) => {
       if (err) {
