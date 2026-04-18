@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { apiService } from "../services/api";
 import { StatsCards } from "./dashboard/StatsCards";
 import { ActivityFeed } from "./dashboard/ActivityFeed";
+import { AssetGrid } from "./dashboard/AssetGrid";
 
 /**
  * Dashboard Stats Interface
@@ -105,16 +106,8 @@ export function Dashboard() {
               </div>
             </div>
             
-            <div className="flex-1 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200 flex flex-col items-center justify-center p-12 text-center">
-              <div className="w-20 h-20 bg-white rounded-3xl shadow-sm border border-slate-100 flex items-center justify-center mb-6">
-                <svg className="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A2 2 0 012.447 15.488V5.012a2 2 0 011.106-1.789L9 0.5l5.447 2.723a2 2 0 011.106 1.789v10.476a2 2 0 01-1.106 1.789L9 20z" />
-                </svg>
-              </div>
-              <p className="text-slate-600 font-bold text-lg mb-2">Fleet Visualization Layer</p>
-              <p className="text-slate-400 text-sm max-w-sm leading-relaxed">
-                Connect your <strong>Digital Twin</strong> simulation to render the live facility grid map.
-              </p>
+            <div className="flex-1">
+               <AssetGrid />
             </div>
           </div>
 
