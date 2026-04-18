@@ -12,6 +12,7 @@ using MQTTnet;
 using IndustrialIot.Application.DTOs;
 using IndustrialIot.Application.Services;
 using MQTTnet.Client;
+using IndustrialIot.Domain.Enums;
 
 namespace IndustrialIot.Infrastructure.Mqtt;
 
