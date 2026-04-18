@@ -43,12 +43,47 @@ dotnet build # Passed
 
 - **SignalR Telemetry**: Implemented `TelemetryHub.cs`, `ITelemetryNotifier`, `TelemetryNotifier.cs`, `TelemetryUpdateDto.cs`.
 - **MQTT Simulator**: Added `scripts/mqtt-telemetry-simulator.js` for E2E testing with edge_device creds.
+- **AlertsController Fixed**: Moved to Api project, added DTO service layer, repo Include(Asset), no more red errors
+
+## 🧪 Test Run Instructions (Full Stack)
+
+### 1. Start Infra
+
+```bash
+docker compose up -d  # Postgres + MQTT
+```
+
+### 2. DB Migrate & API
+
+```bash
+cd server
+dotnet ef database update
+dotnet run --project IndustrialIot.Api  # https://localhost:7xxx/swagger
+```
+
+### 3. Dashboard
+
+```bash
+cd apps/web-dashboard
+pnpm install
+pnpm dev  # http://localhost:5173
+```
+
+### 4. Generate Test Data
+
+```bash
+node scripts/mqtt-telemetry-simulator.js
+```
+
+### 5. Verify
+
+- **Swagger**: GET /api/v1/alerts?count=10
+- **Dashboard**: Live alerts (SignalR)
+- **DB**: `docker exec -it <db_container> psql ... SELECT * FROM "Alerts";`
 
 ## Next Steps
 
-- **Alert State Machine**: Logic for thresholds without spam.
-- Full SignalR frontend integration.
+- Alert state machine enhancements
+- SignalR frontend polish
 
-Updated docs/Rule_manager.md and PROJECT_CHECKLIST.md.
-
-See [PROJECT_CHECKLIST.md](file:///d:/Projects/industrial-iot/docs/PROJECT_CHECKLIST.md) for status.
+Updated: README.md, docs/walkthrough.md, PROJECT_CHECKLIST.md
