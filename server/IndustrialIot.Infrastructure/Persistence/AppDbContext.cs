@@ -8,7 +8,8 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<Asset> Assets => Set<Asset>();
-    public DbSet<Telemetry> Telemetries => Set<Telemetry>();
+public DbSet<Telemetry> Telemetries => Set<Telemetry>();
+    public DbSet<Alert> Alerts => Set<Alert>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,6 +35,24 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Temperature).HasPrecision(18, 2);
             entity.Property(e => e.Pressure).HasPrecision(18, 2);
             entity.Property(e => e.Vibration).HasPrecision(18, 2);
+        });
+
+        // Alert configuration
+        modelBuilder.Entity<Alert>(entity => {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Severity).IsRequired().HasMaxLength(20);
+            entity.Property(e => e.Message).IsRequired().HasMaxLength(500);
+            
+            entity.HasIndex(e => e.AssetId);
+            entity.HasIndex(e => e.EdgeTimestamp);
+            entity.HasIndex(e => new { e.AssetId, e.Type }); // Quick lookup last alert per type
+            
+            // FK
+            entity.HasOne(e => e.Asset)
+                  .WithMany()
+                  .HasForeignKey(e => e.AssetId)
+                  .OnDelete(DeleteBehavior.Cascade); // Delete alerts if asset deleted
         });
     }
 }

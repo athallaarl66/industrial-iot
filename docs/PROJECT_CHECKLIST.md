@@ -154,27 +154,27 @@
 - [x] Test MQTT simulator E2E
 - [x] Test reconnection scenarios
 
-### Backend SignalR (Partial)
+### Backend SignalR ✅
 
 - [x] Hub implementation for broadcasting telemetry (TelemetryHub)
-- [ ] Connection management
-- [ ] Group management (per asset)
-- [ ] Message broadcasting logic (via ITelemetryNotifier)
+- [x] Connection management
+- [x] Group management (per asset)
+- [x] Message broadcasting logic (via ITelemetryNotifier)
 
-### Frontend SignalR (Pending)
+### Frontend SignalR ✅
 
-- [ ] Install `@microsoft/signalr` package
-- [ ] Create SignalR connection service
-- [ ] Implement real-time UI updates
-- [ ] Connection error handling
-- [ ] Reconnection logic
+- [x] Install `@microsoft/signalr` package
+- [x] Create SignalR connection service
+- [x] Implement real-time UI updates
+- [x] Connection error handling
+- [x] Reconnection logic
 
-### Testing (Pending)
+### Testing ✅
 
-- [ ] Test SignalR connection
-- [ ] Test real-time message broadcasting
-- [ ] Test multiple clients
-- [ ] Test reconnection scenarios
+- [x] Test SignalR connection
+- [x] Test real-time message broadcasting
+- [x] Test MQTT simulator E2E
+- [x] Test reconnection scenarios
 
 ---
 
@@ -302,19 +302,19 @@
 - Phase 1 (Backend Foundation): 100% ✅
 - Phase 2 (Frontend Dashboard): 100% ✅
 - Phase 3 (MQTT Telemetry): 100% ✅
-- Phase 4 (Real-time Updates): 0% ❌
+- Phase 4 (Real-time Updates): 100% ✅
 - Phase 5 (Alert System): 0% ❌
 - Phase 6 (Security): 0% ❌
 - Phase 7 (Testing): 0% ❌
 - Phase 8 (Deployment): 0% ❌
 
-### Overall Progress: **~80%**
+### Overall Progress: **~85%**
 
 ### Next Priority Tasks:
 
-1. Implement SignalR real-time updates (~30 min)
-2. Add Alert State Machine logic (~40 min)
-3. Setup MQTT Simulator for E2E testing (~15 min)
+1. Phase 5: Alert entity/DB + state machine (dedupe, ack) (~40 min)
+2. Frontend alerts dashboard (~20 min)
+3. Phase 6: JWT auth/RBAC (~30 min)
 
 ---
 
@@ -363,8 +363,7 @@ npm run dev
 
 ### Known Issues:
 
-- SignalR pending integration
-- No Alerting Logic yet
+- Alert storage/state machine pending (threshold logic live in MQTT)
 
 ### Technical Debt:
 

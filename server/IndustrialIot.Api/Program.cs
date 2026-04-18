@@ -33,10 +33,13 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateAssetValidator>();
 
 // Register Repositories
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
+builder.Services.AddScoped<IAlertRepository, AlertRepository>();
 
 // Register Services
 builder.Services.AddScoped<IAssetService, AssetService>();
+builder.Services.AddScoped<IAlertService, AlertService>();
 builder.Services.AddScoped<IndustrialIot.Application.Services.ITelemetryNotifier, IndustrialIot.Api.Services.TelemetryNotifier>();
+
 
 // Register MQTT Services
 builder.Services.Configure<MqttSettings>(

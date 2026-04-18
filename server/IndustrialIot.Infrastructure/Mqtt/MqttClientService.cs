@@ -212,9 +212,12 @@ public class MqttClientService : IAsyncDisposable
     {
         using var notifierScope = _scopeFactory.CreateScope();
         var notifier = notifierScope.ServiceProvider.GetRequiredService<IndustrialIot.Application.Services.ITelemetryNotifier>();
+        var alertService = notifierScope.ServiceProvider.GetRequiredService<IAlertService>();
+        
         // Update asset status based on thresholds
         var previousStatus = asset.Status;
         var alertMessage = "";
+
 
         if (telemetry.Temperature > 100)
         {
@@ -279,11 +282,26 @@ public class MqttClientService : IAsyncDisposable
         };
         await notifier.PublishTelemetryUpdateAsync(updateDto);
 
+
         if (!string.IsNullOrEmpty(alertMessage))
         {
+            // Create persistent alert with type-specific details
+            string alertType = alertMessage.Contains("temperature") ? "Temperature" :
+                              alertMessage.Contains("pressure") ? "Pressure" :
+                              "Vibration";
+            decimal currentValue = alertMessage.Contains("temperature") ? telemetry.Temperature :
+                                  alertMessage.Contains("pressure") ? telemetry.Pressure :
+                                  telemetry.Vibration;
+            decimal threshold = alertMessage.Contains("temperature") ? (asset.Status == AssetStatus.Critical ? 100m : 80m) :
+                                     alertMessage.Contains("pressure") ? (asset.Status == AssetStatus.Critical ? 500m : 400m) :
+                                     (asset.Status == AssetStatus.Critical ? 10m : 5m);
+
+            await alertService.CreateAlertAsync(asset.Id, alertType, asset.Status.ToString(), alertMessage, currentValue, threshold);
             await notifier.PublishAlertAsync(asset.AssetCode, alertMessage, asset.Status.ToString());
         }
     }
+
+
 
     public async Task StopAsync()
     {
