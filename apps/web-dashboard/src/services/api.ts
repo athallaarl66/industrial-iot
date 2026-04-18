@@ -1,6 +1,5 @@
 import type { Asset, CreateAssetForm as CreateAssetDto } from '../types';
-
-const API_BASE_URL = 'http://localhost:5234/api/v1';
+import { config } from '../config/env';
 
 
 
@@ -17,7 +16,7 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${config.api.baseUrl}${endpoint}`, {
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,
@@ -57,6 +56,13 @@ class ApiService {
     return this.request<boolean>(`/assets/${id}`, {
       method: 'DELETE',
     });
+  }
+
+  /**
+   * Get API base URL from config
+   */
+  getBaseUrl(): string {
+    return config.api.baseUrl;
   }
 }
 

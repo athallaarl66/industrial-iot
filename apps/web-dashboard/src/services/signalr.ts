@@ -1,5 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 import type { TelemetryUpdate } from "../types";
+import { config } from "../config/env";
 
 export interface SignalREvents {
   onTelemetryUpdate: (update: TelemetryUpdate) => void;
@@ -18,7 +19,7 @@ export class SignalRService {
 
   async connect(): Promise<void> {
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5234/telemetryhub")
+      .withUrl(config.signalr.hubUrl)
       .withAutomaticReconnect([0, 2000, 10000, 30000])
       .build();
 
