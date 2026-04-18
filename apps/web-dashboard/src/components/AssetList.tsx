@@ -20,15 +20,15 @@ export function AssetList({ onDelete, refreshTrigger }: AssetListProps) {
   const updateAsset = useCallback((update: TelemetryUpdate) => {
     setAssets((prevAssets) =>
       prevAssets.map((asset) =>
-        asset.assetCode === update.AssetCode
+        asset.assetCode === update.assetCode
           ? {
               ...asset,
-              status: update.Status as Asset["status"],
-              temperature: update.Temperature,
-              pressure: update.Pressure,
-              vibration: update.Vibration,
-              lastUpdate: update.IngestionTimestamp,
-              alertMessage: update.AlertMessage,
+              status: update.status as Asset["status"],
+              temperature: update.temperature,
+              pressure: update.pressure,
+              vibration: update.vibration,
+              lastUpdate: update.ingestionTimestamp,
+              alertMessage: update.alertMessage,
             }
           : asset,
       ),
@@ -45,14 +45,14 @@ export function AssetList({ onDelete, refreshTrigger }: AssetListProps) {
           (data: { assetCode: string; message: string; severity: string }) => {
             console.log("Alert:", data);
             updateAsset({
-              AssetCode: data.assetCode,
-              Status: data.severity,
-              Temperature: 0,
-              Pressure: 0,
-              Vibration: 0,
-              IngestionTimestamp: new Date().toISOString(),
-              AlertMessage: data.message,
-            } as TelemetryUpdate);
+              assetCode: data.assetCode,
+              status: data.severity,
+              temperature: 0,
+              pressure: 0,
+              vibration: 0,
+              ingestionTimestamp: new Date().toISOString(),
+              alertMessage: data.message,
+            });
           },
         );
 

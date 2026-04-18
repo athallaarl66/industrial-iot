@@ -1,4 +1,53 @@
+import { useState, useEffect } from "react";
+import { apiService } from "../services/api";
+
+interface DashboardStats {
+  totalAssets: number;
+  runningAssets: number;
+  warningAssets: number;
+  criticalAssets: number;
+  activeAlerts: number;
+}
+
 export function Dashboard() {
+  const [stats, setStats] = useState<DashboardStats>({
+    totalAssets: 0,
+    runningAssets: 0,
+    warningAssets: 0,
+    criticalAssets: 0,
+    activeAlerts: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadDashboardStats();
+  }, []);
+
+  const loadDashboardStats = async () => {
+    try {
+      const response = await apiService.getAssets();
+      if (response.success && response.data) {
+        const assets = response.data;
+        const running = assets.filter(a => a.status === "Running").length;
+        const warning = assets.filter(a => a.status === "Warning").length;
+        const critical = assets.filter(a => a.status === "Critical").length;
+        const activeAlerts = warning + critical;
+
+        setStats({
+          totalAssets: assets.length,
+          runningAssets: running,
+          warningAssets: warning,
+          criticalAssets: critical,
+          activeAlerts: activeAlerts,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load dashboard stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="p-8 bg-gradient-to-br from-slate-50 to-gray-100 min-h-screen">
       <div className="grid grid-cols-1 xl:grid-cols-6 gap-6 xl:gap-8">
@@ -26,7 +75,9 @@ export function Dashboard() {
                   <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">
                     Total Assets
                   </p>
-                  <p className="text-4xl font-bold text-slate-900 mt-1">247</p>
+                  <p className="text-4xl font-bold text-slate-900 mt-1">
+                    {loading ? "—" : stats.totalAssets}
+                  </p>
                 </div>
               </div>
             </div>
@@ -51,7 +102,9 @@ export function Dashboard() {
                   <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">
                     Running
                   </p>
-                  <p className="text-4xl font-bold text-slate-900 mt-1">235</p>
+                  <p className="text-4xl font-bold text-slate-900 mt-1">
+                    {loading ? "—" : stats.runningAssets}
+                  </p>
                 </div>
               </div>
             </div>
@@ -76,7 +129,9 @@ export function Dashboard() {
                   <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">
                     Active Alerts
                   </p>
-                  <p className="text-4xl font-bold text-slate-900 mt-1">12</p>
+                  <p className="text-4xl font-bold text-slate-900 mt-1">
+                    {loading ? "—" : stats.activeAlerts}
+                  </p>
                 </div>
               </div>
             </div>
@@ -128,7 +183,7 @@ export function Dashboard() {
                       Running
                     </span>
                   </div>
-                  <span className="text-lg font-bold text-slate-900">235</span>
+                  <span className="text-lg font-bold text-slate-900">{loading ? "—" : stats.runningAssets}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
@@ -137,7 +192,7 @@ export function Dashboard() {
                       Warning
                     </span>
                   </div>
-                  <span className="text-lg font-bold text-slate-900">8</span>
+                  <span className="text-lg font-bold text-slate-900">{loading ? "—" : stats.warningAssets}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
@@ -146,7 +201,7 @@ export function Dashboard() {
                       Critical
                     </span>
                   </div>
-                  <span className="text-lg font-bold text-slate-900">4</span>
+                  <span className="text-lg font-bold text-slate-900">{loading ? "—" : stats.criticalAssets}</span>
                 </div>
               </div>
             </div>

@@ -32,11 +32,11 @@ export interface TelemetryData {
 export type AssetStatus = Asset["status"];
 
 export interface TelemetryUpdate {
-  AssetCode: string;
-  Temperature: number;
-  Pressure: number;
-  Vibration: number;
-  Status: string;
-  IngestionTimestamp: string;
-  AlertMessage?: string;
+  assetCode: string;
+  temperature: number;
+  pressure: number;
+  vibration: number;
+  status: string;
+  ingestionTimestamp: string;
+  alertMessage?: string;
 }

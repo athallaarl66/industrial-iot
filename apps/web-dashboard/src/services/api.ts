@@ -1,5 +1,6 @@
 import type { Asset, CreateAssetForm as CreateAssetDto } from '../types';
 import { config } from '../config/env';
+import { parseApiError, getUserFriendlyError, logError } from '../utils/errors';
 
 
 
@@ -7,7 +8,7 @@ export interface ApiResponse<T> {
   success: boolean;
   message: string;
   data: T;
-  errorCode: string | null;
+  errorCode?: string;
 }
 
 class ApiService {
@@ -25,14 +26,29 @@ class ApiService {
       });
 
       const data = await response.json();
+
+      if (!response.ok) {
+        const error = parseApiError(data);
+        logError(error, `API ${options.method || 'GET'} ${endpoint}`);
+
+        return {
+          success: false,
+          message: getUserFriendlyError(error),
+          data: null as T,
+          errorCode: error.code || 'UNKNOWN_ERROR',
+        };
+      }
+
       return data;
     } catch (error) {
-      console.error('API Error:', error);
+      const parsedError = parseApiError(error);
+      logError(parsedError, `API ${options.method || 'GET'} ${endpoint}`);
+
       return {
         success: false,
-        message: 'Failed to connect to API',
+        message: getUserFriendlyError(parsedError),
         data: null as T,
-        errorCode: 'CONNECTION_ERROR',
+        errorCode: parsedError.code || 'UNKNOWN_ERROR',
       };
     }
   }
