@@ -8,10 +8,6 @@ export function AssetsPage() {
   const [assetToDelete, setAssetToDelete] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  /**
-   * Proper state management: trigger refresh without page reload
-   * This forces components to re-fetch data from API
-   */
   const refreshAssets = () => {
     setRefreshTrigger(prev => prev + 1);
   };
@@ -29,7 +25,6 @@ export function AssetsPage() {
     if (!assetToDelete) return;
 
     try {
-      // Call API directly here since AssetList now only calls callback
       const response = await fetch(`/api/assets/${assetToDelete}`, {
         method: "DELETE",
       });
@@ -45,17 +40,30 @@ export function AssetsPage() {
   };
 
   return (
-    <div className="p-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
-          <AssetForm onSuccess={handleAssetCreated} />
+    <div className="p-6 lg:p-8">
+      <div className="space-y-6">
+        {/* Page Header */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Assets</h2>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your industrial IoT assets</p>
         </div>
-        <div className="lg:col-span-2">
-          <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-xl p-8 border border-gray-100">
-            <AssetList onDelete={handleDelete} refreshTrigger={refreshTrigger} />
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add New Asset</h3>
+              <AssetForm onSuccess={handleAssetCreated} />
+            </div>
+          </div>
+          <div className="lg:col-span-2">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Asset List</h3>
+              <AssetList onDelete={handleDelete} refreshTrigger={refreshTrigger} />
+            </div>
           </div>
         </div>
       </div>
+
       <DeleteDialog
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
