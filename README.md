@@ -1,6 +1,14 @@
 # 🏭 Industrial IoT Asset Monitoring & Predictive Dashboard
 
-An enterprise-grade monorepo system for monitoring industrial assets, handling high-throughput telemetry data via MQTT, and visualizing predictive alerts in real-time.
+## 📂 Core Capability Overview
+**Industrial IoT Core** is a sophisticated, enterprise-grade asset intelligence platform designed for the complex demands of the **Oil & Gas (O&G)** and heavy manufacturing sectors. It serves as the "Command Center" for industrial facilities, bridging the gap between raw edge sensor data and high-stakes operational decision-making.
+
+### What is this software?
+This system is an end-to-end monitoring solution that orchestrates:
+- **High-Frequency Ingestion**: Captures real-time telemetry (Temperature, Pressure, Vibration) from dispersed hardware nodes via MQTT protocol.
+- **Predictive Health Analytics**: Analyzes incoming data streams to identify surging trends and threshold violations before they lead to critical equipment failure.
+- **Enterprise-Grade Visualization**: A high-density "Industrial Light" dashboard designed for mission-critical operations centers, providing both a "Bird's-eye view" of global fleet health and granular "Node-level" management.
+- **Real-time Synchronization**: Uses secure Bidirectional handshakes (SignalR) to ensure field operators and remote managers see identical state data with sub-second latency.
 
 Built with a "Secure by Design" mindset and structured using Domain-Driven Design (Clean Architecture).
 
@@ -20,8 +28,9 @@ This project follows a monorepo approach:
 ```text
 /industrial-iot
 ├── /apps                  # Frontend applications
-│   ├── /web-dashboard     # React SPA for monitoring
-│   └── /simulator-edge    # Script for generating mock telemetry data
+│   └── /web-dashboard     # React SPA for monitoring
+├── /scripts               # Edge simulation & utility scripts
+│   └── mqtt-telemetry-simulator.js # Mock telemetry generator
 ├── /infra                 # Containerized infrastructure (DB, MQTT)
 │   └── docker-compose.yml
 └── /server                # Backend .NET Solution
@@ -34,55 +43,32 @@ This project follows a monorepo approach:
 ## 🚀 Getting Started (Local Development)
 
 ### 1. Prerequisites
-```
-
-Docker Desktop
-.NET 8 SDK
-Node.js 18+ + pnpm
-Git
-
-````
+- Docker Desktop
+- .NET 8 SDK
+- Node.js 18+ & pnpm
+- Git
 
 ### 2. Clone & Infrastructure
 ```bash
 git clone https://github.com/athallaarl66/industrial-iot.git
 cd industrial-iot
-cp infra/.env.example infra/.env  # edit DB_PASSWORD
-docker compose up -d  # Postgres(5433) + MQTT
-````
 
-2. Infrastructure Setup (Database & MQTT)
-   We use Docker to spin up the infrastructure locally to ensure a clean development environment without port collisions.
+# Setup Environment
+cp infra/.env.example infra/.env  # Update DB_PASSWORD in .env
 
-Bash
-
-# Navigate to the infra directory
-
+# Start Infrastructure (Postgres 5433 + MQTT Broker)
 cd infra
-
-# Create your environment variables file
-
-cp .env.example .env
-
-# Edit the .env file and set your DB credentials
-
-# DB_USER=iot_admin
-
-# DB_PASSWORD=your_secure_password
-
-# DB_NAME=industrial_iot_db
-
-# Start the containers in detached mode
-
-docker-compose up -d
-Note: The local PostgreSQL database is mapped to port 5433 to avoid collision with any existing local Postgres instances.
+docker compose up -d
+```
+> [!NOTE]
+> The local PostgreSQL database is mapped to port **5433** to avoid collision with default local instances.
 
 ### 3. Backend (.NET API + DB)
 
 ```bash
 cd server
 dotnet ef database update  # from IndustrialIot.Api dir
-dotnet run --project IndustrialIot.Api  # https://localhost:7xxx/swagger
+dotnet run --project IndustrialIot.Api  # https://localhost:7053/swagger
 ```
 
 **Test Alerts:** `GET /api/v1/alerts?count=10`
@@ -101,32 +87,48 @@ pnpm dev  # http://localhost:5173
 node scripts/mqtt-telemetry-simulator.js  # creates alerts automatically
 ```
 
-**Verify:**
+---
 
-- Dashboard → Assets/Alerts (live updates via SignalR)
-- API Swagger → Alerts endpoint
-- DB: `docker exec -it infra_db_1 psql -U iot_admin -d industrial_iot_db -c "SELECT * FROM \"Alerts\" LIMIT 5;"`
+---
 
-### 🔒 Security & Best Practices
+## 📖 Operating Guide & Tutorials
+To get the most out of the **Industrial IoT Core** platform, we have provided a comprehensive usage guide:
 
-- Zero Trust MQTT auth
-- .env secrets (never commit)
-- FluentValidation on all APIs
-- EF Core Includes for N+1 prevention
+👉 **[Read the full Operating Guide & Tutorial here](docs/OPERATING_GUIDE.md)**
 
-🌿 Git Flow & Contribution
-This project follows strict branching strategies:
+This guide covers:
+1. **Provisioning** industrial hardware assets.
+2. **Generating** real-time telemetry via the edge simulator.
+3. **Monitoring** system health from the Command Center.
+4. **Decommissioning** nodes securely.
 
-main : Production-ready code. Do NOT commit directly here.
+---
 
-develop : Integration branch for upcoming features.
+### 6. Verify System Integrity
+Once everything is running, you can verify the status via:
+- **Dashboard**: Check `http://localhost:5173/assets` for live SignalR updates.
+- **API Swagger**: Check `https://localhost:7053/swagger` for alert endpoints.
+- **Database**: 
+  ```bash
+  docker exec -it infra_db_1 psql -U iot_admin -d industrial_iot_db -c "SELECT * FROM \"Alerts\" LIMIT 5;"
+  ```
 
-feat/\* : For new features (e.g., feat/mqtt-ingestion).
+---
 
-fix/\* : For bug fixes (e.g., fix/db-connection-retry).
+## 🔒 Security & Best Practices
+- **Zero Trust MQTT**: All hardware nodes must authenticate via the MQTT broker.
+- **Environment Management**: Use `.env` for all secrets; never commit sensitive data to version control.
+- **API Validation**: Strict `FluentValidation` implemented on all command/query models.
+- **Data Efficiency**: EF Core `Includes` and projections are used to prevent N+1 performance bottlenecks.
 
-Create a Pull Request (PR) against the develop branch for any new changes.
+---
 
-```
+## 🌿 Git Flow & Contribution
+This project follows strict branching strategies to maintain stability:
 
-```
+- **main**: Production-ready code. Direct commits are restricted.
+- **develop**: Integration branch for upcoming features.
+- **feat/* **: Dedicated branches for new features (e.g., `feat/mqtt-ingestion`).
+- **fix/* **: Dedicated branches for bug resolution (e.g., `fix/handshake-loop`).
+
+*Please create a Pull Request (PR) against the `develop` branch for any proposed changes.*
