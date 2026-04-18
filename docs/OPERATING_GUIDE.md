@@ -61,26 +61,35 @@ pnpm dev
 ### Step C: Trigger the Simulation
 ```powershell
 # Terminal 4 - Simulation
-node scripts/mqtt-telemetry-simulator.js
+cd scripts
+node mqtt-telemetry-simulator.js
 ```
 > **Result**: Watch the **Command Center** cards and the **Activity Feed** update automatically as sensor data arrives!
+> [!IMPORTANT]
+> The simulator now fetches assets dynamically. Ensure the **Backend (Brain)** is running before starting the simulator to enable auto-discovery of your custom assets.
 
 ---
 
 ## 🛠️ 4. Feature Deep-Dive
 
-### 📂 Asset Provisioning (Registry)
+### 📂 4.1. Asset Provisioning (Registry)
 Before a machine can send data, it must be "Provisioned" in the registry:
 1.  Navigate to the **Assets** page.
-2.  Use the **Provision Node** form to register a new ID (e.g., `PMP-001`).
+2.  Use the **Provision Node** form to register a new ID (e.g., `PMP-A-001`).
 3.  The system will generate a secure identity for the node.
 
-### 📊 Health Index & KPI Cards
+### 📊 4.2. Health Index & KPI Cards
 *   **🟢 Running**: Machine is healthy and within standard operating baselines.
 *   **🟡 Warning**: Anomalous data detected (e.g., vibration > 5.0mm/s). Action is recommended.
 *   **🔴 Critical**: Threshold violation (e.g., temperature > 90°C). Immediate inspection required.
 
-### 🛡️ Alert Management
+### 📈 4.3. Digital Twin & Analytics Stream
+Every asset is paired with its **Digital Twin Dashboard**:
+1.  **Selection**: Click on any asset card from the main dashboard.
+2.  **Live Telemetry**: View real-time temperature, pressure, and vibration profiles synced via SignalR.
+3.  **Historical Trends**: Analyze the last 50 data points using high-fidelity Area Charts. Use this to identify degradation patterns before they trigger a `Critical` status.
+
+### 🛡️ 4.4. Alert Management
 The system automatically logs every threshold violation.
 > [!NOTE]
 > The **Alerts Hub** UI is currently in "Awaiting Uplink" status. While backend alerts are functional and stored in the database, the dedicated management dashboard is being provisioned for the next release.

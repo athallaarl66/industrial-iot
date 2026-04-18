@@ -765,6 +765,39 @@ VOLUMES:
 
 ---
 
+## ADR-012: Specialized Telemetry Repository Pattern
+
+### Status
+**Accepted**
+
+### Context
+Telemetry data is the highest volume data in the system. Traditional generic repositories often load entire entities or lack optimization for time-series queries. We needed a way to fetch simplified, high-density history for charting without overhead.
+
+### Decision
+**Implement a specialized `ITelemetryRepository` and DTO mapping.**
+- History is fetched as lightweight `TelemetryHistoryDto` (Temperature, Pressure, Vibration, Timestamp).
+- Queries are forced to `AsNoTracking()` and explicit ordering by `EdgeTimestamp` to ensure chart continuity.
+- Implementation is isolated in `IndustrialIot.Infrastructure` to keep the Application layer clean of EF specifics.
+
+---
+
+## ADR-013: Staggered Dynamic Simulation Pattern
+
+### Status
+**Accepted**
+
+### Context
+In actual industrial environments, hundreds of nodes publish data independently. A development simulator that publishes all assets simultaneously creates artificial CPU spikes and doesn't reflect real network jitter.
+
+### Decision
+**Implement an API-aware, staggered round-robin simulation.**
+- **Automation**: Simulator fetches the live asset registry from `GET /api/v1/assets` on startup.
+- **Resilience**: Falls back to a hardcoded list if the API is offline.
+- **Staggering**: Calculates a per-asset interval based on a total window (e.g., 3s / N-assets) to distribute the load evenly over time.
+- **Syncing**: Periodically re-syncs with the API to detect newly provisioned nodes without restart.
+
+---
+
 ## Decision Review Process
 
 ### Criteria for Architecture Decisions
