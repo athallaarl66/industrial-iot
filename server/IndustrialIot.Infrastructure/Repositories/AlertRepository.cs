@@ -29,7 +29,8 @@ public class AlertRepository : IAlertRepository
 
     public async Task<List<Alert>> GetRecentAlertsAsync(int count = 50)
     {
-        return await _context.Alerts
+return await _context.Alerts
+            .Include(a => a.Asset)
             .Where(a => !a.Resolved)
             .OrderByDescending(a => a.CreatedAt)
             .Take(count)

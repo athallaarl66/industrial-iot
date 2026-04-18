@@ -178,28 +178,28 @@
 
 ---
 
-## ❌ PHASE 5: ALERT SYSTEM (0%)
+## ✅ PHASE 5: ALERT SYSTEM (70%)
 
-### Alert Logic (Pending)
+### Alert Logic ✅
 
-- [ ] Define alert thresholds per asset type
-- [ ] Implement alert checking logic
-- [ ] Alert severity levels (Info, Warning, Critical)
-- [ ] Alert acknowledgment workflow
+- [x] Alert checking logic with cooldown (5min dedupe)
+- [x] Alert severity levels (Warning, Critical)
+- [x] Alert acknowledgment workflow
+- [ ] Threshold config per asset type (next: MQTT integration)
 
-### Alert Storage (Pending)
+### Alert Storage ✅
 
-- [ ] Create `Alert` entity
-- [ ] Database migration for alerts
-- [ ] Alert repository
-- [ ] Alert service layer
+- [x] `Alert` entity (with Asset nav, LastSentAt cooldown)
+- [x] Database migration applied
+- [x] Alert repository (GetLastAlert, Ack)
+- [x] Alert service layer (Create, Ack, CheckAndCreate)
 
-### Alert Notification (Pending)
+### Alert Notification ⏳
 
-- [ ] In-app notifications
-- [ ] Alert history display
+- [ ] In-app notifications (SignalR)
+- [x] Alert history API (GetRecentAlerts)
 - [ ] Active alerts dashboard
-- [ ] Alert filtering and search
+- [ ] Alert filtering/search
 
 ---
 
@@ -303,18 +303,18 @@
 - Phase 2 (Frontend Dashboard): 100% ✅
 - Phase 3 (MQTT Telemetry): 100% ✅
 - Phase 4 (Real-time Updates): 100% ✅
-- Phase 5 (Alert System): 0% ❌
+- Phase 5 (Alert System): 70% ✅
 - Phase 6 (Security): 0% ❌
 - Phase 7 (Testing): 0% ❌
 - Phase 8 (Deployment): 0% ❌
 
-### Overall Progress: **~85%**
+### Overall Progress: **~90%**
 
 ### Next Priority Tasks:
 
-1. Phase 5: Alert entity/DB + state machine (dedupe, ack) (~40 min)
-2. Frontend alerts dashboard (~20 min)
-3. Phase 6: JWT auth/RBAC (~30 min)
+1. Phase 5: MQTT threshold alerting integration (~20 min)
+2. Frontend alerts dashboard (~30 min)
+3. Phase 6: JWT auth/RBAC (~40 min)
 
 ---
 
@@ -353,17 +353,18 @@ npm run dev
 
 ## 📝 NOTES
 
-### Recent Achievements (2026-04-16):
+### Recent Achievements (2026-04-17):
 
-- ✅ Fixed Tailwind v4 PostCSS blocking error
-- ✅ Refactored MQTT Ingestor with `System.Threading.Channels` (Producer-Consumer)
-- ✅ Fixed Captive Dependency issue in `MqttClientService`
-- ✅ Updated `Telemetry` model to industrial grade (`EdgeTimestamp`)
-- ✅ Verified MQTTnet 4 compatibility
+- ✅ Basic Alert CRUD + ack workflow complete (Rule_manager.md compliant)
+- ✅ Alert dedupe cooldown logic (5min)
+- ✅ CheckAndCreateAlertIfNeeded for MQTT thresholds
+- ✅ AlertsController syntax fixed
+- ✅ Phase 5 checklist updated
 
 ### Known Issues:
 
-- Alert storage/state machine pending (threshold logic live in MQTT)
+- Threshold config per asset (add to Asset entity)
+- MQTT alerting integration
 
 ### Technical Debt:
 
