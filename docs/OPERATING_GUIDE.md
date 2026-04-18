@@ -87,7 +87,25 @@ The system automatically logs every threshold violation.
 
 ---
 
-## 🔧 5. Troubleshooting & FAQ
+## 💾 5. Database Management
+
+The system uses Entity Framework Core (EF) for schema management. We've provided helper scripts to simplify these operations:
+
+### 🚀 Update Database
+Applies all pending migrations to the live PostgreSQL instance.
+```powershell
+./scripts/db-update.ps1
+```
+
+### 🏗️ Create New Migration
+Generates a new migration file after you've modified the Domain/Infrastructure models.
+```powershell
+./scripts/db-migrate.ps1 -Name "DescriptionOfChange"
+```
+
+---
+
+## 🔧 6. Troubleshooting & FAQ
 
 **Q: I don't see any data in the dashboard.**
 > **A**: Verify that the Simulator is running. Check the simulator logs for `[MQTT] Packet Sent`. Ensure the Asset ID in the simulator exists in your dashboard's registry.
