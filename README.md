@@ -33,57 +33,86 @@ This project follows a monorepo approach:
 
 ## 🚀 Getting Started (Local Development)
 
-1. Prerequisites
-Ensure you have the following installed on your machine:
+### 1. Prerequisites
+```
 
-Docker Desktop (Running)
-
+Docker Desktop
 .NET 8 SDK
+Node.js 18+ + pnpm
+Git
 
-Node.js (v18 or higher) & pnpm
+````
+
+### 2. Clone & Infrastructure
+```bash
+git clone https://github.com/athallaarl66/industrial-iot.git
+cd industrial-iot
+cp infra/.env.example infra/.env  # edit DB_PASSWORD
+docker compose up -d  # Postgres(5433) + MQTT
+````
 
 2. Infrastructure Setup (Database & MQTT)
-We use Docker to spin up the infrastructure locally to ensure a clean development environment without port collisions.
+   We use Docker to spin up the infrastructure locally to ensure a clean development environment without port collisions.
 
 Bash
+
 # Navigate to the infra directory
+
 cd infra
 
 # Create your environment variables file
+
 cp .env.example .env
 
 # Edit the .env file and set your DB credentials
+
 # DB_USER=iot_admin
+
 # DB_PASSWORD=your_secure_password
+
 # DB_NAME=industrial_iot_db
 
 # Start the containers in detached mode
+
 docker-compose up -d
 Note: The local PostgreSQL database is mapped to port 5433 to avoid collision with any existing local Postgres instances.
 
-3. Backend Setup (.NET)
-Apply the database schema using EF Core Code-First migrations.
+### 3. Backend (.NET API + DB)
 
-Bash
-# Navigate to the server directory
+```bash
 cd server
+dotnet ef database update  # from IndustrialIot.Api dir
+dotnet run --project IndustrialIot.Api  # https://localhost:7xxx/swagger
+```
 
-# Update your appsettings.Development.json connection string to match your .env credentials
-# "Host=localhost;Port=5433;Database=industrial_iot_db;Username=iot_admin;Password=your_secure_password"
+**Test Alerts:** `GET /api/v1/alerts?count=10`
 
-# Apply database migrations
-dotnet ef database update --project IndustrialIot.Infrastructure --startup-project IndustrialIot.Api
+### 4. Frontend (Dashboard)
 
-# Run the API
-dotnet run --project IndustrialIot.Api
-The Swagger UI documentation will be available at http://localhost:5xxx/swagger.
+```bash
+cd apps/web-dashboard
+pnpm install
+pnpm dev  # http://localhost:5173
+```
 
-🔒 Security Standards
-Zero Trust: MQTT Broker is secured with authentication (No anonymous access).
+### 5. Test Full Stack (Generate Telemetry + Alerts)
 
-Secrets Management: Sensitive credentials are never committed to version control. Uses .env and User Secrets.
+```bash
+node scripts/mqtt-telemetry-simulator.js  # creates alerts automatically
+```
 
-Data Protection: All APIs strictly validate incoming payloads to prevent injection attacks.
+**Verify:**
+
+- Dashboard → Assets/Alerts (live updates via SignalR)
+- API Swagger → Alerts endpoint
+- DB: `docker exec -it infra_db_1 psql -U iot_admin -d industrial_iot_db -c "SELECT * FROM \"Alerts\" LIMIT 5;"`
+
+### 🔒 Security & Best Practices
+
+- Zero Trust MQTT auth
+- .env secrets (never commit)
+- FluentValidation on all APIs
+- EF Core Includes for N+1 prevention
 
 🌿 Git Flow & Contribution
 This project follows strict branching strategies:
@@ -92,9 +121,12 @@ main : Production-ready code. Do NOT commit directly here.
 
 develop : Integration branch for upcoming features.
 
-feat/* : For new features (e.g., feat/mqtt-ingestion).
+feat/\* : For new features (e.g., feat/mqtt-ingestion).
 
-fix/* : For bug fixes (e.g., fix/db-connection-retry).
+fix/\* : For bug fixes (e.g., fix/db-connection-retry).
 
 Create a Pull Request (PR) against the develop branch for any new changes.
+
+```
+
 ```
