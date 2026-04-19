@@ -49,11 +49,7 @@ pnpm-debug.log*
 # ==========================================
 .DS_Store
 Thumbs.db
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+.vscode/
 
 # ==========================================
 # 6. AI ASSISTANT & CONFIGS
@@ -61,8 +57,7 @@ Thumbs.db
 .claude/
 openspec/
 .agent/
-.vscode/
 
-# docs/Rule_manager.md
-docs/rule_manager.md
-docs/PROJECT_CHECKLIST.md
+# Sensitive internal docs (excluded from public repo)
+docs/Rule_manager.md
+docs/PROJECT_CHECKLIST.md
