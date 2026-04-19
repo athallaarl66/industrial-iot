@@ -50,17 +50,17 @@ export function AssetRow({ asset, onDelete }: AssetRowProps) {
         </span>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+        <div className="flex items-center gap-6">
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-tighter">Temp</span>
-            <span className="text-sm font-mono font-bold text-slate-700">
-              {asset.temperature?.toFixed(1) ?? "—"} <span className="text-[10px] text-slate-400">°C</span>
+            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">Temp</span>
+            <span className="text-sm font-mono font-black text-slate-700 bg-slate-50 px-2 py-1 rounded-md border border-slate-100 min-w-[70px] text-center">
+              {asset.temperature ? `${asset.temperature.toFixed(1)} °C` : "—"}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-tighter">Pres</span>
-            <span className="text-sm font-mono font-bold text-slate-700">
-              {asset.pressure?.toFixed(0) ?? "—"} <span className="text-[10px] text-slate-400">PSI</span>
+            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">Pres</span>
+            <span className="text-sm font-mono font-black text-slate-700 bg-slate-50 px-2 py-1 rounded-md border border-slate-100 min-w-[70px] text-center">
+              {asset.pressure ? `${asset.pressure.toFixed(0)} PSI` : "—"}
             </span>
           </div>
         </div>

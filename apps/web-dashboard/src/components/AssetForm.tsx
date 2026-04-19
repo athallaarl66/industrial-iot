@@ -101,12 +101,12 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <div className="flex justify-between items-end">
-            <label htmlFor="assetCode" className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
+        <div className="space-y-1">
+          <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
+            <label htmlFor="assetCode" className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">
               Asset Identifier
             </label>
-            {errors.assetCode && <span className="text-[10px] font-black text-rose-500 uppercase tracking-tighter">{errors.assetCode}</span>}
+            {errors.assetCode && <span className="text-[9px] font-black text-rose-500 uppercase bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">{errors.assetCode}</span>}
           </div>
           <input
             type="text"
@@ -120,12 +120,12 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
           />
         </div>
 
-        <div>
-          <div className="flex justify-between items-end">
-            <label htmlFor="name" className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
+        <div className="space-y-1">
+          <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
+            <label htmlFor="name" className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">
               Equipment Name
             </label>
-            {errors.name && <span className="text-[10px] font-black text-rose-500 uppercase tracking-tighter">{errors.name}</span>}
+            {errors.name && <span className="text-[9px] font-black text-rose-500 uppercase bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">{errors.name}</span>}
           </div>
           <input
             type="text"
@@ -140,9 +140,9 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <div className="flex justify-between items-end">
-              <label htmlFor="type" className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
+          <div className="space-y-1">
+            <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
+              <label htmlFor="type" className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">
                 Category
               </label>
             </div>
@@ -163,9 +163,9 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
             </select>
           </div>
 
-          <div>
-            <div className="flex justify-between items-end">
-              <label htmlFor="location" className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
+          <div className="space-y-1">
+            <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
+              <label htmlFor="location" className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">
                 Deployment
               </label>
             </div>

@@ -26,10 +26,14 @@ export function AssetStatusCard({ asset }: AssetStatusCardProps) {
 
   const getStatusDot = (status: Asset["status"]) => {
     switch (status) {
-      case "Running": return "status-dot-running";
-      case "Warning": return "status-dot-warning";
-      case "Critical": return "status-dot-critical animate-pulse";
-      default: return "bg-slate-300";
+      case "Running":
+        return "status-dot-running";
+      case "Warning":
+        return "status-dot-warning";
+      case "Critical":
+        return "status-dot-critical animate-pulse";
+      default:
+        return "bg-slate-300";
     }
   };
 
@@ -59,33 +63,47 @@ export function AssetStatusCard({ asset }: AssetStatusCardProps) {
 
       <div className="mt-auto space-y-4">
         {/* Metric Preview */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col">
-            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Temperature</span>
+        <div className="grid grid-cols-1 gap-2 mt-2">
+          <div className="flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              Temp
+            </span>
             <span className="text-sm font-black text-slate-700">
-               {asset.temperature ? `${asset.temperature.toFixed(1)}°C` : "N/A"}
+              {asset.temperature ? `${asset.temperature.toFixed(1)}°C` : "N/A"}
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Pressure</span>
+          <div className="flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              Press
+            </span>
             <span className="text-sm font-black text-slate-700">
-               {asset.pressure ? `${asset.pressure.toFixed(1)} PSI` : "N/A"}
+              {asset.pressure ? `${asset.pressure.toFixed(1)} PSI` : "N/A"}
             </span>
           </div>
         </div>
 
         <div className="h-px bg-slate-100 group-hover:bg-current/10"></div>
 
-        <div className="flex items-center justify-between">
-           <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
-             {asset.type}
-           </span>
-           <div className="flex items-center text-[9px] font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-              VIEW DIGITAL TWIN
-              <svg className="w-2.5 h-2.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-           </div>
+        <div className="flex items-center justify-between gap-2 overflow-hidden">
+          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest truncate min-w-0">
+            {asset.type}
+          </span>
+          <div className="flex items-center text-[9px] font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shrink-0">
+            VIEW
+            <svg
+              className="w-2.5 h-2.5 ml-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              />
+            </svg>
+          </div>
         </div>
       </div>
     </Link>

@@ -60,9 +60,9 @@ export function AssetsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           {/* Action Column */}
-          <div className="lg:col-span-1">
+          <div className="w-full lg:w-[320px] shrink-0">
             <div className="industrial-panel p-8 sticky top-28 bg-slate-50/30">
               <div className="flex items-center space-x-3 mb-8">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
@@ -89,7 +89,7 @@ export function AssetsPage() {
           </div>
 
           {/* Records Column */}
-          <div className="lg:col-span-3">
+          <div className="flex-1 min-w-0">
             <div className="space-y-6">
               <div className="flex items-center justify-between px-2">
                 <div className="flex items-center space-x-3">
