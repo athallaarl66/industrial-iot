@@ -2,6 +2,7 @@ using IndustrialIot.Application.DTOs.Alert;
 using IndustrialIot.Application.Repositories;
 using IndustrialIot.Application.Services;
 using IndustrialIot.Domain.Entities;
+using IndustrialIot.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace IndustrialIot.Application.Services;
@@ -22,7 +23,7 @@ public class AlertService : IAlertService
         _logger = logger;
     }
 
-    public async Task CreateAlertAsync(Guid assetId, string type, string severity, string message, decimal currentValue, decimal threshold)
+    public async Task CreateAlertAsync(Guid assetId, AlertType type, string severity, string message, decimal currentValue, decimal threshold)
     {
         // Check for recent duplicate (dedupe logic - why: prevent spam on continuous threshold breach)
         var lastAlert = await _alertRepository.GetLastAlertAsync(assetId, type);
@@ -69,7 +70,7 @@ public class AlertService : IAlertService
             Id = a.Id,
             AssetCode = a.Asset.AssetCode,
             AssetName = a.Asset.Name,
-            Type = a.Type,
+            Type = a.Type.ToString(),
             Severity = a.Severity,
             Message = a.Message,
             CurrentValue = a.CurrentValue,
@@ -84,7 +85,7 @@ public class AlertService : IAlertService
     }
 
     // Checks if threshold breached and creates alert if cooldown passed
-    public async Task<bool> CheckAndCreateAlertIfNeededAsync(Guid assetId, string type, string severity, string message, decimal currentValue, decimal threshold)
+    public async Task<bool> CheckAndCreateAlertIfNeededAsync(Guid assetId, AlertType type, string severity, string message, decimal currentValue, decimal threshold)
     {
         var lastAlert = await _alertRepository.GetLastAlertAsync(assetId, type);
         if (lastAlert != null && 

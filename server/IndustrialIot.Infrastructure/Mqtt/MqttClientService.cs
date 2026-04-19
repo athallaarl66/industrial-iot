@@ -13,6 +13,7 @@ using IndustrialIot.Application.DTOs;
 using IndustrialIot.Application.Services;
 using MQTTnet.Client;
 using IndustrialIot.Domain.Enums;
+using IndustrialIot.Domain.Models;
 
 namespace IndustrialIot.Infrastructure.Mqtt;
 
@@ -217,50 +218,15 @@ public class MqttClientService : IAsyncDisposable
         var notifier = notifierScope.ServiceProvider.GetRequiredService<IndustrialIot.Application.Services.ITelemetryNotifier>();
         var alertService = notifierScope.ServiceProvider.GetRequiredService<IAlertService>();
         
-        // Update asset status based on configurable thresholds
+        // DELEGATE BUSINESS LOGIC TO DOMAIN ENTITY (Rich Domain Model)
         var previousStatus = asset.Status;
-        var alertMessage = "";
+        var (newStatus, triggeredType, alertMessage) = asset.EvaluateHealth(
+            telemetry.Temperature, 
+            telemetry.Pressure, 
+            telemetry.Vibration, 
+            _thresholds);
 
-        if (telemetry.Temperature > _thresholds.Temperature.Critical)
-        {
-            asset.Status = AssetStatus.Critical;
-            alertMessage = $"High temperature: {telemetry.Temperature}°C";
-            _logger.LogWarning("CRITICAL: {Message} for asset {AssetCode}", alertMessage, asset.AssetCode);
-        }
-        else if (telemetry.Temperature > _thresholds.Temperature.Warning)
-        {
-            asset.Status = AssetStatus.Warning;
-            alertMessage = $"High temperature: {telemetry.Temperature}°C";
-            _logger.LogWarning("WARNING: {Message} for asset {AssetCode}", alertMessage, asset.AssetCode);
-        }
-        else if (telemetry.Pressure > _thresholds.Pressure.Critical)
-        {
-            asset.Status = AssetStatus.Critical;
-            alertMessage = $"High pressure: {telemetry.Pressure} PSI";
-            _logger.LogWarning("CRITICAL: {Message} for asset {AssetCode}", alertMessage, asset.AssetCode);
-        }
-        else if (telemetry.Pressure > _thresholds.Pressure.Warning)
-        {
-            asset.Status = AssetStatus.Warning;
-            alertMessage = $"High pressure: {telemetry.Pressure} PSI";
-            _logger.LogWarning("WARNING: {Message} for asset {AssetCode}", alertMessage, asset.AssetCode);
-        }
-        else if (telemetry.Vibration > _thresholds.Vibration.Critical)
-        {
-            asset.Status = AssetStatus.Critical;
-            alertMessage = $"High vibration: {telemetry.Vibration} mm/s";
-            _logger.LogWarning("CRITICAL: {Message} for asset {AssetCode}", alertMessage, asset.AssetCode);
-        }
-        else if (telemetry.Vibration > _thresholds.Vibration.Warning)
-        {
-            asset.Status = AssetStatus.Warning;
-            alertMessage = $"High vibration: {telemetry.Vibration} mm/s";
-            _logger.LogWarning("WARNING: {Message} for asset {AssetCode}", alertMessage, asset.AssetCode);
-        }
-        else
-        {
-            asset.Status = AssetStatus.Running;
-        }
+        asset.Status = newStatus;
 
         // Save updated asset status
         dbContext.Assets.Update(asset);
@@ -280,26 +246,28 @@ public class MqttClientService : IAsyncDisposable
             Vibration = telemetry.Vibration,
             Status = asset.Status.ToString(),
             IngestionTimestamp = telemetry.IngestionTimestamp,
-            AlertMessage = string.IsNullOrEmpty(alertMessage) ? null : alertMessage
+            AlertMessage = alertMessage
         };
         await notifier.PublishTelemetryUpdateAsync(updateDto);
 
-
-        if (!string.IsNullOrEmpty(alertMessage))
+        if (triggeredType.HasValue && !string.IsNullOrEmpty(alertMessage))
         {
-            // Create persistent alert with type-specific details
-            string alertType = alertMessage.Contains("temperature") ? "Temperature" :
-                              alertMessage.Contains("pressure") ? "Pressure" :
-                              "Vibration";
-            decimal currentValue = alertType == "Temperature" ? telemetry.Temperature :
-                                  alertType == "Pressure" ? telemetry.Pressure :
-                                  telemetry.Vibration;
-            decimal threshold = alertType == "Temperature" ? (asset.Status == AssetStatus.Critical ? _thresholds.Temperature.Critical : _thresholds.Temperature.Warning) :
-                                     alertType == "Pressure" ? (asset.Status == AssetStatus.Critical ? _thresholds.Pressure.Critical : _thresholds.Pressure.Warning) :
-                                     (asset.Status == AssetStatus.Critical ? _thresholds.Vibration.Critical : _thresholds.Vibration.Warning);
+            // Determine threshold used for persistence record
+            decimal threshold = triggeredType.Value switch
+            {
+                AlertType.Temperature => (asset.Status == AssetStatus.Critical ? _thresholds.Temperature.Critical : _thresholds.Temperature.Warning),
+                AlertType.Pressure => (asset.Status == AssetStatus.Critical ? _thresholds.Pressure.Critical : _thresholds.Pressure.Warning),
+                _ => (asset.Status == AssetStatus.Critical ? _thresholds.Vibration.Critical : _thresholds.Vibration.Warning)
+            };
 
-            await alertService.CreateAlertAsync(asset.Id, alertType, asset.Status.ToString(), alertMessage, currentValue, threshold);
-            await notifier.PublishAlertAsync(asset.AssetCode, alertMessage, asset.Status.ToString());
+            decimal currentValue = triggeredType.Value switch
+            {
+                AlertType.Temperature => telemetry.Temperature,
+                AlertType.Pressure => telemetry.Pressure,
+                _ => telemetry.Vibration
+            };
+
+            await alertService.CreateAlertAsync(asset.Id, triggeredType.Value, asset.Status.ToString(), alertMessage, currentValue, threshold);
         }
     }
 

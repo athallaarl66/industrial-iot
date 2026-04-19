@@ -6,6 +6,7 @@ using IndustrialIot.Application.Validators;
 using IndustrialIot.Infrastructure.Mqtt;
 using IndustrialIot.Infrastructure.Persistence;
 using IndustrialIot.Infrastructure.Repositories;
+using IndustrialIot.Domain.Models;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 

@@ -10,7 +10,7 @@ public class Alert
     public Guid AssetId { get; set; }
     public Asset Asset { get; set; } = null!;
     
-    public string Type { get; set; } = string.Empty; // Temperature, Pressure, Vibration
+    public AlertType Type { get; set; } // Temperature, Pressure, Vibration, Connectivity
     public string Severity { get; set; } = string.Empty; // Warning, Critical
     public string Message { get; set; } = string.Empty;
     

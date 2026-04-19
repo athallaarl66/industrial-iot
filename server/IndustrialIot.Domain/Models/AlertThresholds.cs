@@ -1,4 +1,4 @@
-namespace IndustrialIot.Infrastructure.Mqtt;
+namespace IndustrialIot.Domain.Models;
 
 public class AlertThresholds
 {

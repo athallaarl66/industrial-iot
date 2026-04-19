@@ -1,5 +1,6 @@
 using IndustrialIot.Application.Repositories;
 using IndustrialIot.Domain.Entities;
+using IndustrialIot.Domain.Enums;
 using IndustrialIot.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,7 +38,7 @@ return await _context.Alerts
             .ToListAsync();
     }
 
-    public async Task<Alert?> GetLastAlertAsync(Guid assetId, string type)
+    public async Task<Alert?> GetLastAlertAsync(Guid assetId, AlertType type)
     {
         return await _context.Alerts
             .Where(a => a.AssetId == assetId && a.Type == type)
