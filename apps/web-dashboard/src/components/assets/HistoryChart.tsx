@@ -5,7 +5,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   Area,
-  AreaChart
+  AreaChart,
+  ReferenceLine
 } from "recharts";
 import type { TelemetryHistoryEntry } from "../../types";
 
@@ -15,6 +16,7 @@ interface HistoryChartProps {
   dataKey: keyof TelemetryHistoryEntry;
   color: string;
   unit: string;
+  threshold?: number;
 }
 
 /**
@@ -22,7 +24,7 @@ interface HistoryChartProps {
  * Professional time-series visualization for industrial telemetry.
  * Uses AreaChart with gradients for a premium "Digital Twin" feel.
  */
-export function HistoryChart({ data, title, dataKey, color, unit }: HistoryChartProps) {
+export function HistoryChart({ data, title, dataKey, color, unit, threshold }: HistoryChartProps) {
   // Sort data by timestamp ascending for the chart
   const sortedData = [...data].sort((a, b) => 
     new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
@@ -63,19 +65,29 @@ export function HistoryChart({ data, title, dataKey, color, unit }: HistoryChart
               tickLine={false}
             />
             <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.8)', 
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                borderRadius: '16px', 
-                border: '1px solid rgba(255, 255, 255, 0.3)', 
-                boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-                padding: '16px'
+              content={({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                  const val = payload[0].value as number;
+                  const isOver = threshold && val >= threshold;
+                  return (
+                    <div className="bg-white/95 backdrop-blur-xl p-4 rounded-2xl border border-slate-200 shadow-xl min-w-[160px]">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-100 pb-2">{label ? new Date(label as string | number).toLocaleTimeString() : ''}</p>
+                      <p className="text-2xl font-black text-slate-900 mb-1">{val.toFixed(1)} <span className="text-xs font-bold text-slate-400">{unit}</span></p>
+                      {threshold && (
+                         <div className={`mt-3 flex items-center justify-between px-2.5 py-1.5 rounded border ${isOver ? 'bg-rose-50 border-rose-100 text-rose-700' : 'bg-slate-50 border-slate-100 text-slate-500'}`}>
+                           <span className="text-[9px] font-black uppercase tracking-widest">Safe Limit</span>
+                           <span className="text-xs font-black">{threshold}</span>
+                         </div>
+                      )}
+                    </div>
+                  );
+                }
+                return null;
               }}
-              labelStyle={{ color: '#64748b', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}
-              itemStyle={{ color: '#0f172a', fontWeight: 900, fontSize: '15px' }}
-              labelFormatter={(label) => new Date(label).toLocaleString()}
             />
+            {threshold && (
+              <ReferenceLine y={threshold} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={2} label={{ position: 'insideTopLeft', value: 'CRITICAL THRESHOLD', fill: '#ef4444', fontSize: 10, fontWeight: 900 }} />
+            )}
             <Area
               type="monotone"
               dataKey={dataKey}

@@ -61,6 +61,44 @@ While technically a software platform, this system acts as a middleware and "Com
 - **Real-time Comm:** SignalR (WebSockets)
 - **Infrastructure:** Docker Compose (Containerized Infra)
 
+## 🏛️ System Component Architecture
+
+```mermaid
+graph TB
+    subgraph "Frontend"
+        FE[React 19 + TypeScript + Vite + Tailwind]
+    end
+
+    subgraph "Backend API"
+        API[.NET 8 Clean Arch + SignalR Hubs]
+        CTRL[Controllers + Services]
+    end
+
+    subgraph "Data Layer"
+        PG[PostgreSQL 16<br/>Timeseries Optimized]
+        MQ[Mosquitto MQTT Broker<br/>QoS 0/1 Support]
+    end
+
+    subgraph "Edge"
+        IOT["Sensors & PLCs<br/>(MQTT 3.1.1 Clients)"]
+    end
+
+    IOT -->|MQTT 1883| MQ
+    MQ -->|Telemetry Stream| API
+    FE <-->|REST + WebSockets 5234| API
+    API <-->|EF Core| PG
+    API -.->|Live Updates| FE
+
+    classDef edge fill:#ff6b35
+    classDef data fill:#4ecdc4
+    classDef api fill:#45b7d1
+    classDef frontend fill:#96ceb4
+    class IOT edge
+    class PG,MQ data
+    class API,CTRL api
+    class FE frontend
+```
+
 ## 📂 Repository Structure
 
 This project follows a monorepo approach:

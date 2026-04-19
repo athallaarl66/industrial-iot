@@ -65,9 +65,15 @@ export function AssetTable({ assets, onDelete }: AssetTableProps) {
           <span className="text-xs font-bold text-slate-500 uppercase tracking-tight">
             Total Inventory: <span className="text-slate-900 ml-1">{assets.length}</span> Assets
           </span>
-          <div className="flex space-x-2">
-            <button className="px-3 py-1.5 text-[10px] font-bold uppercase rounded border border-slate-200 text-slate-600 hover:bg-white hover:border-slate-300 transition-all shadow-sm">Prev</button>
-            <button className="px-3 py-1.5 text-[10px] font-bold uppercase rounded border border-slate-200 text-slate-600 hover:bg-white hover:border-slate-300 transition-all shadow-sm">Next</button>
+          <div className="flex space-x-3">
+            <button className="flex items-center gap-2 px-4 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 hover:text-blue-600 focus:ring-4 focus:ring-blue-100 transition-all shadow-sm">
+               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+               Prev
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 hover:text-blue-600 focus:ring-4 focus:ring-blue-100 transition-all shadow-sm">
+               Next
+               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
+            </button>
           </div>
         </div>
       </div>

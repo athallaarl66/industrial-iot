@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { CreateAssetForm } from "../types";
 import { apiService } from "../services/api";
+import { toast } from "sonner";
 
 interface AssetFormProps {
   onSuccess: () => void;
@@ -63,6 +64,7 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
         setFormData({ assetCode: "", name: "", type: "", location: "" });
         setErrors({});
         onSuccess();
+        toast.success(`Node ${formData.assetCode} Successfully Provisioned`);
       } else {
         setSubmitError(response.message || "Registry update failed.");
       }

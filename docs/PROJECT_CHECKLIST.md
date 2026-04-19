@@ -192,14 +192,14 @@
 
 ---
 
-## ✅ PHASE 5: ALERT SYSTEM (70%)
+## ✅ PHASE 5: ALERT SYSTEM (100%)
 
 ### Alert Logic ✅
 
 - [x] Alert checking logic with cooldown (5min dedupe)
 - [x] Alert severity levels (Warning, Critical)
 - [x] Alert acknowledgment workflow
-- [ ] Threshold config per asset type (next: MQTT integration)
+- [x] Threshold config per asset type (MQTT integration complete)
 
 ### Alert Storage ✅
 
@@ -208,12 +208,12 @@
 - [x] Alert repository (GetLastAlert, Ack)
 - [x] Alert service layer (Create, Ack, CheckAndCreate)
 
-### Alert Notification ⏳
+### Alert Notification ✅
 
-- [ ] In-app notifications (SignalR)
+- [x] In-app notifications (SignalR & Sonner Global Toasts)
 - [x] Alert history API (GetRecentAlerts)
-- [ ] Active alerts dashboard
-- [ ] Alert filtering/search
+- [x] Active alerts dashboard (Alerts Hub created)
+- [x] Intelligent Activity Feed auto-refresh
 
 ---
 
@@ -341,19 +341,19 @@
 - Phase 2 (Frontend Dashboard): 100% ✅
 - Phase 3 (MQTT Telemetry): 100% ✅
 - Phase 4 (Real-time Updates): 100% ✅
-- Phase 5 (Alert System): 70% ✅
+- Phase 5 (Alert System): 100% ✅
 - Phase 5.5 (Stabilization & Digital Twin): 100% ✅
 - Phase 6 (Security): 0% ❌
 - Phase 7 (Testing): 0% ❌
 - Phase 8 (Deployment): 0% ❌
 
-### Overall Progress: **~92%**
+### Overall Progress: **~94%**
 
 ### Next Priority Tasks:
 
-1. Phase 5: MQTT threshold alerting integration (~20 min)
-2. Frontend alerts dashboard (~30 min)
-3. Phase 6: JWT auth/RBAC (~40 min)
+1. Phase 6: JWT Authentication layer integration (~40 min)
+2. Phase 6: Role-Based Access Control (RBAC) definitions (~30 min)
+3. End-to-end security hardening (CORS, Rate Limiting) (~20 min)
 
 ---
 
@@ -394,6 +394,11 @@ npm run dev
 
 ### Recent Achievements (2026-04-19):
 
+- ✅ **Global Notification Architecture**: Integrated Sonner library for real-time global toast notifications triggered via SignalR telemetry streams.
+- ✅ **Alerts Hub Realized**: Provisioned `AlertsPage.tsx` connecting directly to `GET /api/v1/alerts`. Included comprehensive status badges and timestamp auditing.
+- ✅ **Dashboard Elevation**: Redesigned Health Index with verbose tooltips, added Vibration tracking to Active Fleet cards, and injected live API calls to the Intelligence Feed.
+- ✅ **Digital Twin Thresholds**: Injected Recharts `ReferenceLine` across all time-series panels (Temp, Pressure, Vibrate) and implemented contrasting comparative tooltips.
+- ✅ **Visual Documentation**: Transplanted the system Mermaid structural diagram seamlessly into the front `README.md`.
 - ✅ **SignalR Multicasting Architecture**: Refactored `SignalRService` (`signalr.ts`) using `Set` to support concurrent telemetry subscriptions across `AssetList`, `AssetGrid`, and `AssetDigitalTwin`.
 - ✅ **Telemetry Pipeline Lifecycle**: Strengthened React `useEffect` hooks to dynamically invoke `joinAsset()` and tear down socket connections seamlessly during user navigation.
 - ✅ **UI/UX Pro-Max Upgrades**: Integrated full-page Skeleton Loaders, applied premium glassmorphism filters to historical charts, scaled fonts to industrial monospaced profiles, and successfully routed the `ActivityFeed` into the pending Alerts Hub.

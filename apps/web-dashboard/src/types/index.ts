@@ -47,3 +47,18 @@ export interface TelemetryHistoryEntry {
   vibration: number;
   timestamp: string;
 }
+
+export interface AlertDto {
+  id: string;
+  assetCode: string;
+  assetName: string;
+  type: string;
+  severity: "Warning" | "Critical";
+  message: string;
+  currentValue: number;
+  threshold: number;
+  edgeTimestamp: string;
+  acknowledged: boolean;
+  resolved: boolean;
+  createdAt: string;
+}

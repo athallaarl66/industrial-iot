@@ -1,49 +1,75 @@
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-
-interface ActivityItem {
-  id: string;
-  assetCode: string;
-  status: "Running" | "Warning" | "Critical";
-  message: string;
-  details: string;
-  timestamp: string;
-}
+import { apiService } from "../../services/api";
+import type { AlertDto, TelemetryUpdate } from "../../types";
+import { signalRService } from "../../services/signalr";
+import { toast } from "sonner";
 
 /**
  * ActivityFeed Component
  * Displays a real-time stream of audit logs and system events.
  */
 export function ActivityFeed() {
-  const activities: ActivityItem[] = [
-    {
-      id: "1",
-      assetCode: "PMP-A-001",
-      status: "Running",
-      message: "Normal Operation",
-      details: "Temperature 72°C, Pressure 145 PSI",
-      timestamp: "2 min ago",
-    },
-    {
-      id: "2",
-      assetCode: "CMP-B-002",
-      status: "Warning",
-      message: "Initial Warning",
-      details: "Vibration above threshold (8.2 mm/s)",
-      timestamp: "5 min ago",
-    },
-    {
-      id: "3",
-      assetCode: "VLV-C-003",
-      status: "Critical",
-      message: "Pressure Surge",
-      details: "Inlet pressure exceeded safety limit (450 PSI)",
-      timestamp: "12 min ago",
-    },
-  ];
+  const [activities, setActivities] = useState<AlertDto[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const getStatusConfig = (status: ActivityItem["status"]) => {
+  const fetchAlerts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await apiService.getAlerts(5);
+      if (response.success && response.data) {
+        setActivities(response.data);
+      }
+    } catch (e) {
+      console.error("[ActivityFeed] Failed to load alerts");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAlerts();
+  }, [fetchAlerts]);
+
+  // Hook into SignalR to show toasts and update feed on new alerts
+  useEffect(() => {
+    let isMounted = true;
+    let unsubscribe: (() => void) | undefined;
+
+    const setupListener = async () => {
+      try {
+        if (!signalRService.isConnected()) {
+           await signalRService.connect();
+        }
+        if (isMounted) {
+          unsubscribe = signalRService.on("onTelemetryUpdate", (update: TelemetryUpdate) => {
+            if (update.alertMessage && (update.status === "Critical" || update.status === "Warning")) {
+               fetchAlerts(); // Re-fetch feed silently
+               // Dispatch Global Toast
+               if (update.status === "Critical") {
+                 toast.error(`[${update.assetCode}] ${update.alertMessage}`);
+               } else {
+                 toast.warning(`[${update.assetCode}] ${update.alertMessage}`);
+               }
+            }
+          });
+        }
+      } catch (e) {
+        console.error("SignalR Listener failed in ActivityFeed");
+      }
+    };
+    setupListener();
+
+    return () => {
+      isMounted = false;
+      if (unsubscribe) unsubscribe();
+    };
+  }, [fetchAlerts]);
+
+  const getStatusConfig = (status: string) => {
     switch (status) {
       case "Running":
+      case "Maintenance":
         return {
           bg: "bg-emerald-50",
           text: "text-emerald-600",
@@ -61,6 +87,12 @@ export function ActivityFeed() {
           text: "text-rose-600",
           dot: "bg-rose-500",
         };
+      default:
+        return {
+          bg: "bg-slate-50",
+          text: "text-slate-600",
+          dot: "bg-slate-500",
+        };
     }
   };
 
@@ -71,8 +103,12 @@ export function ActivityFeed() {
         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white px-3 py-1 rounded-full border border-slate-200">Real-time Stream</span>
       </div>
       <div className="divide-y divide-slate-100">
-        {activities.map((item) => {
-          const config = getStatusConfig(item.status);
+        {loading ? (
+           <div className="px-8 py-5 text-center text-slate-400 text-sm font-bold animate-pulse">Syncing Intelligence Stream...</div>
+        ) : activities.length === 0 ? (
+           <div className="px-8 py-10 text-center text-slate-400 text-sm font-bold uppercase tracking-widest border border-dashed border-slate-200 mx-8 my-4 rounded-xl">No active warnings or critical events.</div>
+        ) : activities.map((item) => {
+          const config = getStatusConfig(item.severity);
           return (
             <div key={item.id} className="px-8 py-5 flex items-start space-x-6 hover:bg-slate-50/50 transition-colors group">
               <div className={`mt-1 h-12 w-12 ${config.bg} rounded-2xl flex items-center justify-center border border-transparent group-hover:border-slate-200 transition-all shadow-sm shrink-0`}>
@@ -80,17 +116,19 @@ export function ActivityFeed() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 truncate">
                     <span className={`text-[10px] font-black uppercase tracking-widest ${config.text}`}>
-                      {item.status}
+                      {item.severity}
                     </span>
                     <span className="text-slate-200">|</span>
-                    <span className="text-sm font-black text-slate-900">{item.assetCode}</span>
+                    <span className="text-sm font-black text-slate-900 truncate">{item.assetCode}</span>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{item.timestamp}</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter shrink-0 ml-2">
+                    {new Date(item.edgeTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                  </span>
                 </div>
                 <p className="text-sm font-bold text-slate-700 mt-1 leading-relaxed">
-                  {item.message}: <span className="font-normal text-slate-500">{item.details}</span>
+                  {item.type}: <span className="font-normal text-slate-500">{item.message} ({item.currentValue.toFixed(1)} vs Limit: {item.threshold})</span>
                 </p>
               </div>
             </div>

@@ -61,4 +61,8 @@ Thumbs.db
 .claude/
 openspec/
 .agent/
+.vscode/
+
 # docs/Rule_manager.md
+docs/rule_manager.md
+docs/PROJECT_CHECKLIST.md

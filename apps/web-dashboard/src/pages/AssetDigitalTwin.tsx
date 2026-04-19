@@ -140,9 +140,9 @@ export default function AssetDigitalTwin() {
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Link to="/" className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400">
-               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            <Link to="/" className="p-2 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors shadow-sm text-slate-600">
+               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                </svg>
             </Link>
             <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Digital Twin / {asset.assetCode}</span>
@@ -191,13 +191,14 @@ export default function AssetDigitalTwin() {
 
       {/* Historical Charts */}
       <h2 className="text-sm font-black text-slate-400 uppercase tracking-[0.3em] mb-6">Telemetry Analytics Stream</h2>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <HistoryChart 
           data={history} 
           title="Temperature History" 
           dataKey="temperature" 
           color="#10b981" 
           unit="°C" 
+          threshold={85}
         />
         <HistoryChart 
           data={history} 
@@ -205,16 +206,16 @@ export default function AssetDigitalTwin() {
           dataKey="pressure" 
           color="#f59e0b" 
           unit="PSI" 
+          threshold={140}
         />
-        <div className="lg:col-span-2">
-          <HistoryChart 
-            data={history} 
-            title="Vibration Profile" 
-            dataKey="vibration" 
-            color="#ec4899" 
-            unit="mm/s" 
-          />
-        </div>
+        <HistoryChart 
+          data={history} 
+          title="Vibration Profile" 
+          dataKey="vibration" 
+          color="#ec4899" 
+          unit="mm/s" 
+          threshold={8.0}
+        />
       </div>
     </div>
   );

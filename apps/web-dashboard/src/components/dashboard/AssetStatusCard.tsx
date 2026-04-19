@@ -80,6 +80,14 @@ export function AssetStatusCard({ asset }: AssetStatusCardProps) {
               {asset.pressure ? `${asset.pressure.toFixed(1)} PSI` : "N/A"}
             </span>
           </div>
+          <div className="flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              Vibrate
+            </span>
+            <span className="text-sm font-black text-slate-700">
+              {asset.vibration ? `${asset.vibration.toFixed(1)} mm/s` : "N/A"}
+            </span>
+          </div>
         </div>
 
         <div className="h-px bg-slate-100 group-hover:bg-current/10"></div>

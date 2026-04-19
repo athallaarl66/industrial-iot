@@ -78,6 +78,10 @@ class ApiService {
     return this.request<import('../types').TelemetryHistoryEntry[]>(`/assets/${id}/telemetry?limit=${limit}`);
   }
 
+  async getAlerts(count: number = 50): Promise<ApiResponse<import('../types').AlertDto[]>> {
+    return this.request<import('../types').AlertDto[]>(`/alerts?count=${count}`);
+  }
+
   /**
    * Get API base URL from config
    */

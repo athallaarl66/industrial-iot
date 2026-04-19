@@ -90,7 +90,7 @@ export function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Main Visualization Grid (Grid of All Assets per Architecture doc) */}
-          <div className="lg:col-span-2 industrial-panel p-8 min-h-[500px] flex flex-col">
+          <div className="lg:col-span-2 industrial-panel p-8 flex flex-col">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Active Fleet Deployment</h3>
               <div className="flex space-x-4">
@@ -117,20 +117,24 @@ export function Dashboard() {
               <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight mb-8">Health Index</h3>
               <div className="space-y-8">
                 {[
-                  { label: "Running", count: stats.runningAssets, text: "text-emerald-600", color: "bg-emerald-500", track: "bg-emerald-50" },
-                  { label: "Warning", count: stats.warningAssets, text: "text-amber-600", color: "bg-amber-500", track: "bg-amber-50" },
-                  { label: "Critical", count: stats.criticalAssets, text: "text-rose-600", color: "bg-rose-500", track: "bg-rose-50" },
+                  { label: "Running", count: stats.runningAssets, text: "text-emerald-600", color: "bg-emerald-500", track: "bg-emerald-50", tooltip: "Operating natively within established baseline parameters." },
+                  { label: "Warning", count: stats.warningAssets, text: "text-amber-600", color: "bg-amber-500", track: "bg-amber-50", tooltip: "Approaching predictive limits. Requires monitoring." },
+                  { label: "Critical", count: stats.criticalAssets, text: "text-rose-600", color: "bg-rose-500", track: "bg-rose-50", tooltip: "Exceeding safety bounds. Immediate intervention required." },
                 ].map((item) => (
-                  <div key={item.label}>
+                  <div key={item.label} className="group relative">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{item.label}</span>
                       <span className={`text-xl font-black ${item.text}`}>{loading ? "0" : item.count}</span>
                     </div>
-                    <div className={`w-full ${item.track} rounded-full h-3`}>
+                    <div className={`w-full ${item.track} rounded-full h-3 cursor-help relative`}>
                       <div 
                         className={`h-3 rounded-full ${item.color} transition-all duration-1000 shadow-sm`}
                         style={{ width: stats.totalAssets > 0 ? `${(item.count / stats.totalAssets) * 100}%` : "0%" }}
                       ></div>
+                    </div>
+                    {/* Tooltip Hover */}
+                    <div className="absolute left-0 -top-12 bg-slate-900 border border-slate-700 text-white text-[10px] px-3 py-2 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 font-bold uppercase tracking-widest shadow-2xl">
+                      {item.tooltip}
                     </div>
                   </div>
                 ))}
@@ -148,7 +152,14 @@ export function Dashboard() {
                <div className="mt-8 flex items-center justify-between">
                  <span className="text-[10px] font-bold text-white/50 uppercase">Gateway Uplink Stable</span>
                  <div className="flex -space-x-2">
-                    {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full border border-blue-600 bg-blue-400"></div>)}
+                    {stats.totalAssets > 0 ? (
+                       <div className="flex items-center">
+                         <div className="w-8 h-8 rounded-full border-2 border-blue-600 bg-blue-400 flex items-center justify-center text-[10px] font-black text-blue-900 shadow-lg">MQTT</div>
+                         <div className="w-8 h-8 rounded-full border-2 border-blue-600 bg-blue-300 flex items-center justify-center text-[10px] font-black text-blue-900 shadow-lg -ml-2">WS</div>
+                       </div>
+                    ) : (
+                       <>{[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full border border-blue-600 bg-blue-400"></div>)}</>
+                    )}
                  </div>
                </div>
             </div>
