@@ -1,4 +1,6 @@
 const mqtt = require("mqtt");
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../infra/.env") });
 
 /**
  * CONFIGURATION
@@ -13,6 +15,7 @@ const MQTT_OPTIONS = {
   password: process.env.MQTT_PASSWORD || (() => { throw new Error("MQTT_PASSWORD env var is required. See infra/.env.example"); })(),
   clientId: `telemetry-simulator-${Math.random().toString(16).substring(2, 8)}`,
 };
+
 
 
 const API_BASE_URL = "http://localhost:5234/api/v1";

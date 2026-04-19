@@ -69,12 +69,17 @@ npm run dev
 ```powershell
 # Terminal 4 - Simulation
 cd scripts
+# Ensure npm packages are installed (dotenv)
+npm install
+# Start the simulator
 node mqtt-telemetry-simulator.js
 ```
 
 > **Result**: Watch the **Command Center** cards and the **Activity Feed** update automatically as sensor data arrives!
 > [!IMPORTANT]
-> The simulator now fetches assets dynamically. Ensure the **Backend (Brain)** is running before starting the simulator to enable auto-discovery of your custom assets.
+> **Environment Setup**: The simulator now strictly adheres to security rules and requires `MQTT_PASSWORD` to be set. It will automatically load variables from `../infra/.env`. Make sure you have completed the infrastructure setup in Step A.
+> 
+> **Auto-Discovery**: The simulator fetches assets dynamically. Ensure the **Backend (Brain)** is running before starting the simulator.
 
 ---
 

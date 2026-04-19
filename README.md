@@ -165,8 +165,13 @@ npm run dev  # http://localhost:5173
 
 ### 5. Test Full Stack (Generate Telemetry + Alerts)
 
+> [!IMPORTANT]
+> The simulator now requires environment variables to be set. It will automatically load connection details from `infra/.env`.
+
 ```bash
-node scripts/mqtt-telemetry-simulator.js  # creates alerts automatically
+cd scripts
+npm install           # First time only
+node mqtt-telemetry-simulator.js
 ```
 
 ---
