@@ -55,8 +55,8 @@ While technically a software platform, this system acts as a middleware and "Com
 ## 🛠️ Tech Stack
 
 - **Backend:** .NET 8 Web API (Clean Architecture)
-- **Frontend:** React + Vite + TypeScript + Tailwind + Shadcn UI
-- **Database:** PostgreSQL (Relational & Time-Series Data)
+- **Frontend:** React 19 + Vite + TypeScript + Tailwind CSS
+- **Database:** PostgreSQL 16 (Relational & Time-Series Data)
 - **Messaging Protocol:** Eclipse Mosquitto (MQTT Broker)
 - **Real-time Comm:** SignalR (WebSockets)
 - **Infrastructure:** Docker Compose (Containerized Infra)
@@ -107,6 +107,10 @@ This project follows a monorepo approach:
 /industrial-iot
 ├── /apps                  # Frontend applications
 │   └── /web-dashboard     # React SPA for monitoring
+├── /docs                  # Project documentation
+│   ├── OPERATING_GUIDE.md # Full operating manual & tutorials
+│   ├── PROJECT_CHECKLIST.md # Progress tracking
+│   └── Rule_manager.md    # Alert rule specifications
 ├── /scripts               # Edge simulation & utility scripts
 │   └── mqtt-telemetry-simulator.js # Mock telemetry generator
 ├── /infra                 # Containerized infrastructure (DB, MQTT)
@@ -123,7 +127,7 @@ This project follows a monorepo approach:
 ### 1. Prerequisites
 - Docker Desktop
 - .NET 8 SDK
-- Node.js 18+ & pnpm
+- Node.js 18+ & npm
 - Git
 
 ### 2. Clone & Infrastructure
@@ -145,8 +149,8 @@ docker compose up -d
 
 ```bash
 cd server
-dotnet ef database update  # from IndustrialIot.Api dir
-dotnet run --project IndustrialIot.Api  # https://localhost:7053/swagger
+dotnet ef database update --project IndustrialIot.Infrastructure --startup-project IndustrialIot.Api
+dotnet run --project IndustrialIot.Api  # http://localhost:5234/swagger
 ```
 
 **Test Alerts:** `GET /api/v1/alerts?count=10`
@@ -155,8 +159,8 @@ dotnet run --project IndustrialIot.Api  # https://localhost:7053/swagger
 
 ```bash
 cd apps/web-dashboard
-pnpm install
-pnpm dev  # http://localhost:5173
+npm install
+npm run dev  # http://localhost:5173
 ```
 
 ### 5. Test Full Stack (Generate Telemetry + Alerts)
@@ -164,8 +168,6 @@ pnpm dev  # http://localhost:5173
 ```bash
 node scripts/mqtt-telemetry-simulator.js  # creates alerts automatically
 ```
-
----
 
 ---
 
@@ -185,7 +187,8 @@ This guide covers:
 ### 6. Verify System Integrity
 Once everything is running, you can verify the status via:
 - **Dashboard**: Check `http://localhost:5173/assets` for live SignalR updates.
-- **API Swagger**: Check `https://localhost:7053/swagger` for alert endpoints.
+- **API Swagger**: Check `http://localhost:5234/swagger` for full API docs & alert endpoints.
+- **Health Check**: `GET http://localhost:5234/health`
 - **Database**: 
   ```bash
   docker exec -it infra_db_1 psql -U iot_admin -d industrial_iot_db -c "SELECT * FROM \"Alerts\" LIMIT 5;"
@@ -194,10 +197,13 @@ Once everything is running, you can verify the status via:
 ---
 
 ## 🔒 Security & Best Practices
-- **Zero Trust MQTT**: All hardware nodes must authenticate via the MQTT broker.
+- **Zero Trust MQTT**: All hardware nodes must authenticate via username/password with the Mosquitto broker.
 - **Environment Management**: Use `.env` for all secrets; never commit sensitive data to version control.
 - **API Validation**: Strict `FluentValidation` implemented on all command/query models.
-- **Data Efficiency**: EF Core `Includes` and projections are used to prevent N+1 performance bottlenecks.
+- **Data Efficiency**: EF Core `AsNoTracking` and projections are used to prevent N+1 performance bottlenecks.
+
+> [!NOTE]
+> **JWT Authentication & RBAC** are planned for Phase 6. The current version operates without authentication, intended for internal/LAN deployment only.
 
 ---
 
