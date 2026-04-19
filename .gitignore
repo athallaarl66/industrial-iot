@@ -15,7 +15,9 @@ secrets.json
 infra/db_data/
 infra/mosquitto/data/
 infra/mosquitto/log/
-# Catatan: infra/mosquitto/config/ TETAP di-push karena itu file setting, bukan data.
+# passwords.txt harus di-generate lokal via mosquitto_passwd, jangan di-commit
+infra/mosquitto/config/passwords.txt
+# Catatan: infra/mosquitto/config/ lainnya TETAP di-push (mosquitto.conf, acl, dll).
 
 # ==========================================
 # 3. BACKEND (.NET / C#)

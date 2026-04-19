@@ -2,14 +2,18 @@ const mqtt = require("mqtt");
 
 /**
  * CONFIGURATION
+ * Credentials are loaded from environment variables.
+ * Set them before running: MQTT_USERNAME, MQTT_PASSWORD
+ * Or copy infra/.env.example to infra/.env and run with env loaded.
  */
 const MQTT_OPTIONS = {
-  host: "localhost",
-  port: 1883,
-  username: "backend_service",
-  password: "backend_secure_passwd_2026",
+  host: process.env.MQTT_HOST || "localhost",
+  port: parseInt(process.env.MQTT_PORT || "1883"),
+  username: process.env.MQTT_USERNAME || "edge_device",
+  password: process.env.MQTT_PASSWORD || (() => { throw new Error("MQTT_PASSWORD env var is required. See infra/.env.example"); })(),
   clientId: `telemetry-simulator-${Math.random().toString(16).substring(2, 8)}`,
 };
+
 
 const API_BASE_URL = "http://localhost:5234/api/v1";
 const SYNC_INTERVAL_MS = 60000; // Refetch assets every 1 minute

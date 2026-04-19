@@ -34,12 +34,14 @@
 ```bash
 # Edge Device Credentials
 Username: edge_device
-Password: edge_secure_passwd_2026
+Password: <see infra/.env — MQTT_EDGE_PASSWORD>
 
 # Backend Service Credentials
 Username: backend_service
-Password: backend_secure_passwd_2026
+Password: <see infra/.env — MQTT_BACKEND_PASSWORD>
 ```
+
+> **Security Note:** Never commit real credentials. Copy `infra/.env.example` to `infra/.env` and set your own passwords.
 
 #### Certificate-Based Auth (Future - Recommended)
 
@@ -474,14 +476,17 @@ pattern read #
 #### Mosquitto CLI Tools
 
 ```bash
+# Load credentials from your .env file first:
+source infra/.env
+
 # Subscribe to all topics (for debugging)
-mosquitto_sub -h localhost -u edge_device -P edge_secure_passwd_2026 -v -t "iot/#"
+mosquitto_sub -h localhost -u edge_device -P $MQTT_EDGE_PASSWORD -v -t "iot/#"
 
 # Publish test message
-mosquitto_pub -h localhost -u edge_device -P edge_secure_passwd_2026 -t "iot/telemetry/PMP-A-001" -m '{"assetCode":"PMP-A-001","temperature":85.5}'
+mosquitto_pub -h localhost -u edge_device -P $MQTT_EDGE_PASSWORD -t "iot/telemetry/PMP-A-001" -m '{"assetCode":"PMP-A-001","temperature":85.5}'
 
 # Monitor broker statistics
-mosquitto_sub -h localhost -u backend_service -P backend_secure_passwd_2026 -t "$SYS/broker/load/+" -v
+mosquitto_sub -h localhost -u backend_service -P $MQTT_BACKEND_PASSWORD -t "$SYS/broker/load/+" -v
 ```
 
 #### MQTT Explorer
@@ -515,7 +520,7 @@ Or you can override the discovery with specific parameters:
 node mqtt-telemetry-simulator.js --asset PMP-A-001 --interval 3s
 ```
 
-**Creds:** `edge_device` / `edge_secure_passwd_2026`
+**Creds:** `edge_device` / `<MQTT_EDGE_PASSWORD from infra/.env>`
 
 ---
 

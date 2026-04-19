@@ -45,6 +45,8 @@ builder.Services.AddScoped<IndustrialIot.Application.Services.ITelemetryNotifier
 // Register MQTT Services
 builder.Services.Configure<MqttSettings>(
     builder.Configuration.GetSection(MqttSettings.SectionName));
+builder.Services.Configure<AlertThresholds>(
+    builder.Configuration.GetSection(AlertThresholds.SectionName));
 builder.Services.AddSingleton<MqttClientService>();
 builder.Services.AddHostedService<MqttBackgroundService>();
 
