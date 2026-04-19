@@ -65,47 +65,70 @@ export function AssetList({ onDelete, refreshTrigger }: AssetListProps) {
   // Real-time Gateway Lifecycle
   useEffect(() => {
     let isMounted = true;
+    let unsubscribe: (() => void) | undefined;
 
-    const connectGateway = async () => {
-      if (isConnecting.current || signalRService.isConnected()) return;
-      
+    const setupGateway = async () => {
       try {
-        isConnecting.current = true;
-        await signalRService.connect();
+        if (!signalRService.isConnected() && !isConnecting.current) {
+          isConnecting.current = true;
+          await signalRService.connect();
+        }
         
         if (isMounted) {
-          signalRService.on("onTelemetryUpdate", handleTelemetryUpdate);
+          unsubscribe = signalRService.on("onTelemetryUpdate", handleTelemetryUpdate);
           assets.forEach((a) => signalRService.joinAsset(a.assetCode));
-          console.log("[Gateway] Real-time telemetry link operational.");
+          console.log("[Registry] Real-time telemetry link operational.");
         }
       } catch (err) {
-        console.error("[Gateway] Handshake failed:", err);
+        console.error("[Registry] Handshake failed:", err);
       } finally {
         isConnecting.current = false;
       }
     };
 
     if (assets.length > 0) {
-      connectGateway();
+      setupGateway();
     }
 
     return () => {
       isMounted = false;
-      // We don't disconnect immediately to allow smooth transitions, 
-      // but we remove listeners if needed.
+      // Cleanup the event listener when unmounting or re-running
+      if (unsubscribe) unsubscribe();
     };
   }, [assets.length, handleTelemetryUpdate]);
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center h-96 space-y-6">
-        <div className="relative w-16 h-16">
-          <div className="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
-          <div className="absolute inset-0 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-        <div className="text-center">
-          <p className="text-sm font-black text-slate-900 uppercase tracking-widest">Syncing Registry</p>
-          <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">Establishing Secure Data Link...</p>
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden animate-pulse">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-50">
+              <tr>
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <th key={i} className="px-6 py-4">
+                    <div className="h-3 bg-slate-200 rounded w-20"></div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 bg-white">
+              {[1, 2, 3, 4, 5].map((row) => (
+                <tr key={row}>
+                  <td className="px-6 py-4"><div className="h-4 bg-slate-200 rounded w-32 mb-2"></div><div className="h-3 bg-slate-100 rounded w-24"></div></td>
+                  <td className="px-6 py-4"><div className="h-5 bg-slate-200 rounded-full w-16"></div></td>
+                  <td className="px-6 py-4"><div className="h-4 bg-slate-200 rounded w-20"></div></td>
+                  <td className="px-6 py-4"><div className="h-6 bg-slate-200 rounded-lg w-24"></div></td>
+                  <td className="px-6 py-4">
+                    <div className="flex gap-4">
+                      <div className="h-8 bg-slate-200 rounded w-12"></div>
+                      <div className="h-8 bg-slate-200 rounded w-12"></div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4"><div className="h-4 bg-slate-200 rounded w-20"></div></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     );

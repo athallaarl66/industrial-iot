@@ -35,6 +35,14 @@ This document records the major architectural and functional upgrades implemente
     - Implemented **Auto-Discovery**: Simulator calls `GET /api/v1/assets` on startup.
     - Implemented **Staggered Publishing**: Used a round-robin scheduling algorithm to distribute MQTT traffic evenly, preventing CPU spikes.
 
+## 5. UI/UX Pro-Max & Real-Time Orchestration (Phase 5+)
+- **WHAT**: Complete overhaul of the frontend SignalR subscription mechanics and applied premium industrial aesthetics.
+- **WHY**: The frontend dropped live telemetry packets when navigating between dashboard views, and the UI felt incomplete/static during initial data loads.
+- **HOW**:
+    - **SignalR Multicasting**: Rewrote `SignalRService` utilizing dynamic JavaScript `Set` structures, enabling concurrent listeners across the Dashboard and Digital Twin without callback collision.
+    - **Lifecycle Hooks**: Patched robust `joinAsset` and teardown mechanics within `useEffect` across all React orchestrators (`AssetGrid`, `AssetList`, `AssetDigitalTwin`).
+    - **Glassmorphism & Skeletons**: Embellished UI leveraging `ui-ux-pro-max` guidelines. Replaced static loading spinners with comprehensive layouts *Skeleton Loaders*, injected semi-transparent *glassmorphic* aesthetics to the `recharts` tooltips, and fixed broken links towards the Alerts Hub route (`/alerts`).
+
 ---
 
 _Project State: **Production Ready (v1.0-Hardened)**_

@@ -39,41 +39,88 @@ export default function AssetDigitalTwin() {
   }, [loadData]);
 
   useEffect(() => {
+    let isMounted = true;
+    let unsubscribe: (() => void) | undefined;
+    let isConnecting = false;
+
     const handleUpdate = (update: TelemetryUpdate) => {
-      if (asset && asset.assetCode === update.assetCode) {
-        // Update live metrics
-        setAsset((prev) => prev ? ({
+      setAsset((prev) => {
+        if (!prev || prev.assetCode !== update.assetCode) return prev;
+        return {
           ...prev,
           status: update.status as Asset["status"],
           temperature: update.temperature,
           pressure: update.pressure,
           vibration: update.vibration
-        }) : null);
+        };
+      });
 
-        // Append to history for real-time chart update
-        setHistory((prev) => {
-          const newEntry: TelemetryHistoryEntry = {
-            temperature: update.temperature,
-            pressure: update.pressure,
-            vibration: update.vibration,
-            timestamp: update.ingestionTimestamp
-          };
-          return [...prev.slice(1), newEntry]; // Maintain window size
-        });
+      // Append to history for real-time chart update
+      setHistory((prev) => {
+        const newEntry: TelemetryHistoryEntry = {
+          temperature: update.temperature,
+          pressure: update.pressure,
+          vibration: update.vibration,
+          timestamp: update.ingestionTimestamp
+        };
+        // Ensure we only append if we have previous data
+        if (prev.length === 0) return [newEntry];
+        return [...prev.slice(1), newEntry]; // Maintain window size
+      });
+    };
+
+    const setupTelemetry = async () => {
+      if (!asset?.assetCode) return;
+      try {
+        if (!signalRService.isConnected() && !isConnecting) {
+          isConnecting = true;
+          await signalRService.connect();
+          isConnecting = false;
+        }
+
+        if (isMounted) {
+          unsubscribe = signalRService.on("onTelemetryUpdate", handleUpdate);
+          await signalRService.joinAsset(asset.assetCode);
+          console.log(`[DigitalTwin] Linked to live telemetry for ${asset.assetCode}`);
+        }
+      } catch (err) {
+        console.error("[DigitalTwin] Telemetry link failed", err);
       }
     };
 
-    signalRService.on("onTelemetryUpdate", handleUpdate);
+    setupTelemetry();
+
     return () => {
-      // Cleanup managed by signalRService
+      isMounted = false;
+      if (unsubscribe) unsubscribe();
+      if (asset?.assetCode && signalRService.isConnected()) {
+        signalRService.leaveAsset(asset.assetCode).catch(console.error);
+      }
     };
-  }, [asset]);
+  }, [asset?.assetCode]);
 
   if (loading) {
     return (
-      <div className="p-8 flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
-        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Syncing Digital Twin...</p>
+      <div className="p-8 max-w-7xl mx-auto animate-pulse">
+        <div className="flex justify-between mb-10">
+          <div>
+            <div className="h-4 w-32 bg-slate-200 rounded mb-4"></div>
+            <div className="h-10 w-64 bg-slate-200 rounded mb-2"></div>
+            <div className="h-4 w-48 bg-slate-200 rounded"></div>
+          </div>
+          <div className="h-12 w-32 bg-slate-200 rounded-2xl"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div className="h-32 bg-slate-100 rounded-2xl border border-slate-200"></div>
+          <div className="h-32 bg-slate-100 rounded-2xl border border-slate-200"></div>
+          <div className="h-32 bg-slate-100 rounded-2xl border border-slate-200"></div>
+        </div>
+        <div className="h-4 w-48 bg-slate-200 rounded mb-6 mt-10"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="h-[350px] bg-slate-100 rounded-2xl border border-slate-200"></div>
+          <div className="h-[350px] bg-slate-100 rounded-2xl border border-slate-200"></div>
+          <div className="lg:col-span-2 h-[350px] bg-slate-100 rounded-2xl border border-slate-200"></div>
+        </div>
       </div>
     );
   }

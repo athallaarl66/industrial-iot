@@ -50,16 +50,18 @@ export function AssetGrid() {
 
   useEffect(() => {
     let isMounted = true;
+    let unsubscribe: (() => void) | undefined;
 
     const initConnection = async () => {
-      if (isConnecting.current || signalRService.isConnected()) return;
-      
       try {
-        isConnecting.current = true;
-        await signalRService.connect();
+        if (!signalRService.isConnected() && !isConnecting.current) {
+          isConnecting.current = true;
+          await signalRService.connect();
+        }
         
         if (isMounted) {
-          signalRService.on("onTelemetryUpdate", handleTelemetryUpdate);
+          unsubscribe = signalRService.on("onTelemetryUpdate", handleTelemetryUpdate);
+          assets.forEach((a) => signalRService.joinAsset(a.assetCode));
           console.log("[AssetGrid] Linked to live telemetry stream.");
         }
       } catch (err) {
@@ -75,6 +77,7 @@ export function AssetGrid() {
 
     return () => {
       isMounted = false;
+      if (unsubscribe) unsubscribe();
     };
   }, [assets.length, handleTelemetryUpdate]);
 

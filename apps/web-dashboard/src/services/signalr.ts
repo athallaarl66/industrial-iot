@@ -16,7 +16,10 @@ export type SignalREventNames = "onTelemetryUpdate" | "onAlert";
 
 export class SignalRService {
   private connection: signalR.HubConnection | null = null;
-  private callbacks: Partial<SignalREvents> = {};
+  private callbacks: Record<string, Set<Function>> = {
+    onTelemetryUpdate: new Set(),
+    onAlert: new Set(),
+  };
 
   async connect(): Promise<void> {
     try {
@@ -36,7 +39,7 @@ export class SignalRService {
           ingestionTimestamp: (data.IngestionTimestamp || data.ingestionTimestamp) as string,
           alertMessage: (data.AlertMessage || data.alertMessage) as string | undefined,
         };
-        this.callbacks.onTelemetryUpdate?.(normalizedUpdate as TelemetryUpdate);
+        this.callbacks.onTelemetryUpdate.forEach((cb) => cb(normalizedUpdate as TelemetryUpdate));
       });
 
       this.connection.on("AlertUpdate", (data: Record<string, unknown>) => {
@@ -45,7 +48,7 @@ export class SignalRService {
           message: (data.Message || data.message) as string,
           severity: (data.Severity || data.severity) as string,
         };
-        this.callbacks.onAlert?.(normalizedAlert);
+        this.callbacks.onAlert.forEach((cb) => cb(normalizedAlert));
       });
 
       this.connection.onclose(() => {
@@ -72,12 +75,11 @@ export class SignalRService {
     }
   }
 
-  on(
-    event: keyof SignalREvents,
-    callback: SignalREvents[keyof SignalREvents],
-  ): void {
-    (this.callbacks as Record<string, (...args: any[]) => void>)[event] =
-      callback;
+  on(event: keyof SignalREvents, callback: Function): () => void {
+    this.callbacks[event].add(callback);
+    return () => {
+      this.callbacks[event].delete(callback);
+    };
   }
 
   async joinAsset(assetCode: string): Promise<void> {

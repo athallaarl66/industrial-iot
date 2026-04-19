@@ -64,14 +64,16 @@ export function HistoryChart({ data, title, dataKey, color, unit }: HistoryChart
             />
             <Tooltip 
               contentStyle={{ 
-                backgroundColor: '#ffffff', 
-                borderRadius: '12px', 
-                border: 'none', 
-                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-                padding: '12px'
+                backgroundColor: 'rgba(255, 255, 255, 0.8)', 
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                borderRadius: '16px', 
+                border: '1px solid rgba(255, 255, 255, 0.3)', 
+                boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+                padding: '16px'
               }}
-              labelStyle={{ color: '#64748b', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', marginBottom: '4px' }}
-              itemStyle={{ color: '#0f172a', fontWeight: 900, fontSize: '14px' }}
+              labelStyle={{ color: '#64748b', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}
+              itemStyle={{ color: '#0f172a', fontWeight: 900, fontSize: '15px' }}
               labelFormatter={(label) => new Date(label).toLocaleString()}
             />
             <Area

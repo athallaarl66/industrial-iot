@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 interface ActivityItem {
   id: string;
   assetCode: string;
@@ -96,12 +98,15 @@ export function ActivityFeed() {
         })}
       </div>
       <div className="px-8 py-5 bg-slate-50 border-t border-slate-100 flex justify-center">
-        <button className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-blue-600 transition-colors flex items-center">
-          Access Complete Historical Logs
+        <Link 
+          to="/alerts"
+          className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-blue-600 transition-colors flex items-center"
+        >
+          Access Complete Alerts Hub
           <svg className="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
           </svg>
-        </button>
+        </Link>
       </div>
     </div>
   );

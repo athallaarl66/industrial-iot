@@ -394,6 +394,9 @@ npm run dev
 
 ### Recent Achievements (2026-04-19):
 
+- ✅ **SignalR Multicasting Architecture**: Refactored `SignalRService` (`signalr.ts`) using `Set` to support concurrent telemetry subscriptions across `AssetList`, `AssetGrid`, and `AssetDigitalTwin`.
+- ✅ **Telemetry Pipeline Lifecycle**: Strengthened React `useEffect` hooks to dynamically invoke `joinAsset()` and tear down socket connections seamlessly during user navigation.
+- ✅ **UI/UX Pro-Max Upgrades**: Integrated full-page Skeleton Loaders, applied premium glassmorphism filters to historical charts, scaled fonts to industrial monospaced profiles, and successfully routed the `ActivityFeed` into the pending Alerts Hub.
 - ✅ **Telemetry History API**: Deployed optimized `TelemetryRepository` and specific `GET /api/v1/assets/{id}/telemetry` endpoint using `AsNoTracking` EF Core features.
 - ✅ **Digital Twin UI**: Added `AssetGrid` orchestrator, `AssetDigitalTwin` routing, and implemented `recharts` for smoothed historical area charts.
 - ✅ **Broker Hardening**: Aligned Simulator and Backend MQTT topics to `iot/telemetry/{assetCode}`, introduced DevOps PowerShell scripts to handle complex EF updates.
