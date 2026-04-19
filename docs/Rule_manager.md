@@ -39,8 +39,15 @@ Saya ingin:
 - JANGAN membalikan status 200 OK jika sebenarnya terjadi error (gunakan 400, 404, 500 dengan tepat).
 - Frontend: Reusable components, sub-components dipecah jika logikanya berbeda. Inline validation per field. Custom delete dialog (bukan window.confirm).
 - harus ada dokumentasi kode lengkap untuk anggota tim lain misal dan juga untuk saya sendiri agar tidak acak acakan dan ketika project misal lama mandeg bisa di lanjutkan dengan jelas karena ada dokumentasinya
+- setiap generate kode pastikan jangan langsung semua perfitur saja lalu lanjut ke fitur lain dan hatus selesaikan satu fitur sampai selesai baru lanjut ke fitur lain
 
 ---
+
+## GITHUB workflow
+
+- setiap selesai generate code pastikan ada commit message
+- masukan ke github dilakukan oleh developer sendiri manual
+- setiap perubahan kode itu wajib perfitur agar ter track di github per commit jadi tidak membuat tim lain kebingungan
 
 ## SYSTEM YANG AKAN DIBANGUN
 

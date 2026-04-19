@@ -502,14 +502,20 @@ mosquitto_sub -h localhost -u backend_service -P backend_secure_passwd_2026 -t "
 
 #### MQTT Simulator
 
-Use `scripts/mqtt-telemetry-simulator.js` for automated testing:
+Use `scripts/mqtt-telemetry-simulator.js` for automated testing. The simulator now features **Auto-Discovery** (fetches live assets from `GET /api/v1/assets`) and **Staggered Publishing** (round-robin scheduling to distribute MQTT traffic evenly):
 
 ```bash
 cd scripts
+# Auto-discover assets from API and simulate them with a staggered total window of 3s
+node mqtt-telemetry-simulator.js
+```
+
+Or you can override the discovery with specific parameters:
+```bash
 node mqtt-telemetry-simulator.js --asset PMP-A-001 --interval 3s
 ```
 
-Creds: edge_device / edge_secure_passwd_2026
+**Creds:** `edge_device` / `edge_secure_passwd_2026`
 
 ---
 

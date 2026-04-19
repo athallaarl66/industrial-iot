@@ -187,6 +187,11 @@ This project uses a modern, enterprise-grade technology stack optimized for real
 - **Open Source:** No licensing costs
 - **Extensible:** Plugin system for custom features
 
+#### Processing Pattern: High-Throughput Producer-Consumer
+- **Mechanism:** `System.Threading.Channels` (in-memory queues)
+- **Producer:** `MqttBackgroundService` subscribes and drops payloads instantly into a Channel.
+- **Consumer:** Dedicated background workers drain the Channel, process business rules, and persist to PostgreSQL efficiently without stalling the broker.
+
 ---
 
 ## Infrastructure Technology Stack
