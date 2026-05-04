@@ -11,6 +11,12 @@ export interface Asset {
   vibration?: number;
   lastUpdate?: string;
   alertMessage?: string;
+  warningTemperature?: number;
+  criticalTemperature?: number;
+  warningPressure?: number;
+  criticalPressure?: number;
+  warningVibration?: number;
+  criticalVibration?: number;
 }
 
 export interface CreateAssetForm {
@@ -18,6 +24,12 @@ export interface CreateAssetForm {
   name: string;
   type: string;
   location: string;
+  warningTemperature?: number;
+  criticalTemperature?: number;
+  warningPressure?: number;
+  criticalPressure?: number;
+  warningVibration?: number;
+  criticalVibration?: number;
 }
 
 export interface TelemetryData {

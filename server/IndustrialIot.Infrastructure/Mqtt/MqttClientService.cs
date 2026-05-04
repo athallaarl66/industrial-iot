@@ -220,7 +220,7 @@ public class MqttClientService : IAsyncDisposable
         
         // DELEGATE BUSINESS LOGIC TO DOMAIN ENTITY (Rich Domain Model)
         var previousStatus = asset.Status;
-        var (newStatus, triggeredType, alertMessage) = asset.EvaluateHealth(
+        var (newStatus, triggeredType, alertMessage, breachedThreshold) = asset.EvaluateHealth(
             telemetry.Temperature, 
             telemetry.Pressure, 
             telemetry.Vibration, 
@@ -250,16 +250,8 @@ public class MqttClientService : IAsyncDisposable
         };
         await notifier.PublishTelemetryUpdateAsync(updateDto);
 
-        if (triggeredType.HasValue && !string.IsNullOrEmpty(alertMessage))
+        if (triggeredType.HasValue && !string.IsNullOrEmpty(alertMessage) && breachedThreshold.HasValue)
         {
-            // Determine threshold used for persistence record
-            decimal threshold = triggeredType.Value switch
-            {
-                AlertType.Temperature => (asset.Status == AssetStatus.Critical ? _thresholds.Temperature.Critical : _thresholds.Temperature.Warning),
-                AlertType.Pressure => (asset.Status == AssetStatus.Critical ? _thresholds.Pressure.Critical : _thresholds.Pressure.Warning),
-                _ => (asset.Status == AssetStatus.Critical ? _thresholds.Vibration.Critical : _thresholds.Vibration.Warning)
-            };
-
             decimal currentValue = triggeredType.Value switch
             {
                 AlertType.Temperature => telemetry.Temperature,
@@ -267,7 +259,7 @@ public class MqttClientService : IAsyncDisposable
                 _ => telemetry.Vibration
             };
 
-            await alertService.CreateAlertAsync(asset.Id, triggeredType.Value, asset.Status.ToString(), alertMessage, currentValue, threshold);
+            await alertService.CreateAlertAsync(asset.Id, triggeredType.Value, asset.Status.ToString(), alertMessage, currentValue, breachedThreshold.Value);
         }
     }
 

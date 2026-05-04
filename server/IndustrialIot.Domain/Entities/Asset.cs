@@ -13,38 +13,55 @@ public class Asset
     public AssetStatus Status { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    // Custom Thresholds (Optional)
+    public decimal? WarningTemperature { get; set; }
+    public decimal? CriticalTemperature { get; set; }
+    public decimal? WarningPressure { get; set; }
+    public decimal? CriticalPressure { get; set; }
+    public decimal? WarningVibration { get; set; }
+    public decimal? CriticalVibration { get; set; }
+
     /// <summary>
     /// Business Logic: Evaluates the asset health based on telemetry data.
     /// Returns a tuple of (NewStatus, AlertType, AlertMessage) if a threshold is violated.
     /// </summary>
-    public (AssetStatus Status, AlertType? TriggeredAlertType, string? AlertMessage) EvaluateHealth(
+    public (AssetStatus Status, AlertType? TriggeredAlertType, string? AlertMessage, decimal? BreachedThreshold) EvaluateHealth(
         decimal temperature, 
         decimal pressure, 
         decimal vibration, 
         AlertThresholds thresholds)
     {
         // 1. Check Temperature
-        if (temperature > thresholds.Temperature.Critical)
-            return (AssetStatus.Critical, AlertType.Temperature, $"Critical high temperature: {temperature}°C");
+        decimal critTemp = CriticalTemperature ?? thresholds.Temperature.Critical;
+        decimal warnTemp = WarningTemperature ?? thresholds.Temperature.Warning;
+
+        if (temperature > critTemp)
+            return (AssetStatus.Critical, AlertType.Temperature, $"Critical high temperature: {temperature}°C", critTemp);
         
-        if (temperature > thresholds.Temperature.Warning)
-            return (AssetStatus.Warning, AlertType.Temperature, $"High temperature: {temperature}°C");
+        if (temperature > warnTemp)
+            return (AssetStatus.Warning, AlertType.Temperature, $"High temperature: {temperature}°C", warnTemp);
 
         // 2. Check Pressure
-        if (pressure > thresholds.Pressure.Critical)
-            return (AssetStatus.Critical, AlertType.Pressure, $"Critical high pressure: {pressure} PSI");
+        decimal critPress = CriticalPressure ?? thresholds.Pressure.Critical;
+        decimal warnPress = WarningPressure ?? thresholds.Pressure.Warning;
+
+        if (pressure > critPress)
+            return (AssetStatus.Critical, AlertType.Pressure, $"Critical high pressure: {pressure} PSI", critPress);
         
-        if (pressure > thresholds.Pressure.Warning)
-            return (AssetStatus.Warning, AlertType.Pressure, $"High pressure: {pressure} PSI");
+        if (pressure > warnPress)
+            return (AssetStatus.Warning, AlertType.Pressure, $"High pressure: {pressure} PSI", warnPress);
 
         // 3. Check Vibration
-        if (vibration > thresholds.Vibration.Critical)
-            return (AssetStatus.Critical, AlertType.Vibration, $"Critical high vibration: {vibration} mm/s");
+        decimal critVib = CriticalVibration ?? thresholds.Vibration.Critical;
+        decimal warnVib = WarningVibration ?? thresholds.Vibration.Warning;
+
+        if (vibration > critVib)
+            return (AssetStatus.Critical, AlertType.Vibration, $"Critical high vibration: {vibration} mm/s", critVib);
         
-        if (vibration > thresholds.Vibration.Warning)
-            return (AssetStatus.Warning, AlertType.Vibration, $"High vibration: {vibration} mm/s");
+        if (vibration > warnVib)
+            return (AssetStatus.Warning, AlertType.Vibration, $"High vibration: {vibration} mm/s", warnVib);
 
         // 4. All good
-        return (AssetStatus.Running, null, null);
+        return (AssetStatus.Running, null, null, null);
     }
 }

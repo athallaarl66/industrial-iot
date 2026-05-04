@@ -198,7 +198,7 @@ export default function AssetDigitalTwin() {
           dataKey="temperature" 
           color="#10b981" 
           unit="°C" 
-          threshold={85}
+          threshold={asset.criticalTemperature ?? 100}
         />
         <HistoryChart 
           data={history} 
@@ -206,7 +206,7 @@ export default function AssetDigitalTwin() {
           dataKey="pressure" 
           color="#f59e0b" 
           unit="PSI" 
-          threshold={140}
+          threshold={asset.criticalPressure ?? 500}
         />
         <HistoryChart 
           data={history} 
@@ -214,7 +214,7 @@ export default function AssetDigitalTwin() {
           dataKey="vibration" 
           color="#ec4899" 
           unit="mm/s" 
-          threshold={8.0}
+          threshold={asset.criticalVibration ?? 10.0}
         />
       </div>
     </div>

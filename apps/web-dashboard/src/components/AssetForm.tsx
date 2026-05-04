@@ -184,6 +184,97 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
           </div>
         </div>
 
+        {/* Custom Thresholds Section */}
+        <div className="pt-4 border-t border-slate-100">
+          <h3 className="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">Custom Thresholds (Optional)</h3>
+          
+          <div className="space-y-4">
+            {/* Temperature */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">Warn Temp (°C)</label>
+                <input
+                  type="number"
+                  name="warningTemperature"
+                  value={formData.warningTemperature || ""}
+                  onChange={handleChange}
+                  placeholder="e.g. 80"
+                  className={getInputClass("warningTemperature" as keyof FormErrors)}
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">Crit Temp (°C)</label>
+                <input
+                  type="number"
+                  name="criticalTemperature"
+                  value={formData.criticalTemperature || ""}
+                  onChange={handleChange}
+                  placeholder="e.g. 100"
+                  className={getInputClass("criticalTemperature" as keyof FormErrors)}
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            {/* Pressure */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">Warn Press (PSI)</label>
+                <input
+                  type="number"
+                  name="warningPressure"
+                  value={formData.warningPressure || ""}
+                  onChange={handleChange}
+                  placeholder="e.g. 400"
+                  className={getInputClass("warningPressure" as keyof FormErrors)}
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">Crit Press (PSI)</label>
+                <input
+                  type="number"
+                  name="criticalPressure"
+                  value={formData.criticalPressure || ""}
+                  onChange={handleChange}
+                  placeholder="e.g. 500"
+                  className={getInputClass("criticalPressure" as keyof FormErrors)}
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            {/* Vibration */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">Warn Vib (mm/s)</label>
+                <input
+                  type="number"
+                  name="warningVibration"
+                  value={formData.warningVibration || ""}
+                  onChange={handleChange}
+                  placeholder="e.g. 5"
+                  className={getInputClass("warningVibration" as keyof FormErrors)}
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">Crit Vib (mm/s)</label>
+                <input
+                  type="number"
+                  name="criticalVibration"
+                  value={formData.criticalVibration || ""}
+                  onChange={handleChange}
+                  placeholder="e.g. 10"
+                  className={getInputClass("criticalVibration" as keyof FormErrors)}
+                  disabled={loading}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="pt-2">
           <button
             type="submit"
