@@ -22,10 +22,12 @@ function StatCard({
 }) {
   return (
     <div className={`industrial-panel px-5 py-4 border-l-4 ${accent}`}>
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+      <p className="text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest mb-1">
         {label}
       </p>
-      <p className="text-3xl font-black text-slate-900">{value}</p>
+      <p className="text-3xl font-black text-[var(--color-industrial-text)]">
+        {value}
+      </p>
     </div>
   );
 }
@@ -48,13 +50,13 @@ function SeverityBadge({ severity }: { severity: string }) {
 /** A single alert row — kept slim for density. */
 function AlertRow({ alert }: { alert: AlertDto }) {
   return (
-    <tr className="hover:bg-slate-50/60 transition-colors group">
+    <tr className="hover:bg-[var(--color-industrial-border)]/30 transition-colors group">
       {/* Asset */}
       <td className="px-5 py-3">
-        <span className="text-sm font-black text-slate-900 group-hover:text-blue-600 transition-colors block">
+        <span className="text-sm font-black text-[var(--color-industrial-text)] group-hover:text-blue-600 transition-colors block">
           {alert.assetCode}
         </span>
-        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-tight">
+        <span className="text-[10px] uppercase font-bold text-[var(--color-industrial-text-muted)] tracking-tight">
           {alert.assetName}
         </span>
       </td>
@@ -66,15 +68,17 @@ function AlertRow({ alert }: { alert: AlertDto }) {
 
       {/* Type & Message */}
       <td className="px-5 py-3">
-        <span className="text-xs font-bold text-slate-700">{alert.type}</span>
-        <span className="text-xs font-medium text-slate-500 ml-1.5">
+        <span className="text-xs font-bold text-[var(--color-industrial-text)]">
+          {alert.type}
+        </span>
+        <span className="text-xs font-medium text-[var(--color-industrial-text-muted)] ml-1.5">
           {alert.message}
         </span>
         <div className="flex items-center gap-2 mt-1">
-          <span className="bg-slate-100 text-[9px] font-black text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-widest">
+          <span className="bg-[var(--color-industrial-bg)] text-[9px] font-black text-[var(--color-industrial-text-muted)] px-1.5 py-0.5 rounded uppercase tracking-widest border border-[var(--color-industrial-border)]">
             R: {alert.currentValue.toFixed(1)}
           </span>
-          <span className="bg-slate-100 text-[9px] font-black text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-widest">
+          <span className="bg-[var(--color-industrial-bg)] text-[9px] font-black text-[var(--color-industrial-text-muted)] px-1.5 py-0.5 rounded uppercase tracking-widest border border-[var(--color-industrial-border)]">
             Limit: {alert.threshold}
           </span>
         </div>
@@ -123,11 +127,11 @@ export function AlertsPage() {
   // ── Derived state ────────────────────────────────────────────────────────
   const criticalCount = useMemo(
     () => alerts.filter((a) => a.severity === "Critical").length,
-    [alerts]
+    [alerts],
   );
   const warningCount = useMemo(
     () => alerts.filter((a) => a.severity === "Warning").length,
-    [alerts]
+    [alerts],
   );
 
   const filtered = useMemo(() => {
@@ -154,30 +158,39 @@ export function AlertsPage() {
   return (
     <div className="p-6 lg:p-8 max-w-[1400px] mx-auto animate-in fade-in duration-500">
       <div className="space-y-6">
-
         {/* ── Header ── */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-100 pb-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--color-industrial-border)] pb-6">
           <div className="flex items-center gap-3">
             <Link
               to="/"
-              className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400"
+              className="p-2 hover:bg-[var(--color-industrial-border)]/40 rounded-xl transition-colors text-[var(--color-industrial-text-muted)]"
               aria-label="Back to dashboard"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </Link>
             <div>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight italic">
+              <h1 className="text-3xl font-black text-[var(--color-industrial-text)] tracking-tight italic">
                 Alerts Hub
               </h1>
-              <p className="text-slate-500 text-sm font-medium mt-0.5">
+              <p className="text-[var(--color-industrial-text-muted)] text-sm font-medium mt-0.5">
                 Centralized threshold-violation log
               </p>
             </div>
           </div>
           {/* Live indicator */}
-          <div className="flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-100">
+          <div className="flex items-center gap-2 bg-[var(--color-industrial-panel)] px-3 py-1.5 rounded-lg border border-[var(--color-industrial-border)]">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
@@ -190,9 +203,21 @@ export function AlertsPage() {
 
         {/* ── Stats ── */}
         <div className="grid grid-cols-3 gap-4">
-          <StatCard label="Total Alerts" value={alerts.length} accent="border-slate-300" />
-          <StatCard label="Critical" value={criticalCount} accent="border-rose-500" />
-          <StatCard label="Warning" value={warningCount} accent="border-amber-400" />
+          <StatCard
+            label="Total Alerts"
+            value={alerts.length}
+            accent="border-slate-300"
+          />
+          <StatCard
+            label="Critical"
+            value={criticalCount}
+            accent="border-rose-500"
+          />
+          <StatCard
+            label="Warning"
+            value={warningCount}
+            accent="border-amber-400"
+          />
         </div>
 
         {/* ── Filters ── */}
@@ -201,9 +226,16 @@ export function AlertsPage() {
           <div className="relative flex-1">
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
-              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
+              />
             </svg>
             <input
               id="alerts-search"
@@ -211,12 +243,12 @@ export function AlertsPage() {
               placeholder="Search by asset code or name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full pl-9 pr-4 py-2.5 text-sm border border-[var(--color-industrial-border)] rounded-xl bg-[var(--color-industrial-panel)] text-[var(--color-industrial-text)] placeholder:text-[var(--color-industrial-text-muted)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
 
           {/* Severity filter */}
-          <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
+          <div className="flex items-center gap-1 bg-[var(--color-industrial-panel)] rounded-xl p-1 border border-[var(--color-industrial-border)]">
             {(["All", "Critical", "Warning"] as SeverityFilter[]).map((f) => (
               <button
                 key={f}
@@ -224,8 +256,8 @@ export function AlertsPage() {
                 onClick={() => setSeverityFilter(f)}
                 className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
                   severityFilter === f
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
+                    ? "bg-[var(--color-industrial-bg)] text-[var(--color-industrial-text)] shadow-sm"
+                    : "text-[var(--color-industrial-text-muted)] hover:text-[var(--color-industrial-text)]"
                 }`}
               >
                 {f}
@@ -238,22 +270,34 @@ export function AlertsPage() {
         <div className="industrial-panel overflow-hidden">
           {loading ? (
             <div className="py-16 text-center">
-              <div className="w-10 h-10 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              <div className="w-10 h-10 border-4 border-[var(--color-industrial-border)]/60 border-t-blue-600 rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-xs font-bold text-[var(--color-industrial-text-muted)] uppercase tracking-widest">
                 Syncing alert logs...
               </p>
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-16 text-center">
-              <div className="w-16 h-16 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div className="w-16 h-16 bg-[var(--color-industrial-bg)] rounded-2xl border border-[var(--color-industrial-border)] flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-8 h-8 text-emerald-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
-              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight italic mb-1">
-                {search || severityFilter !== "All" ? "No results found" : "Zero Active Threats"}
+              <h3 className="text-lg font-black text-[var(--color-industrial-text)] uppercase tracking-tight italic mb-1">
+                {search || severityFilter !== "All"
+                  ? "No results found"
+                  : "Zero Active Threats"}
               </h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--color-industrial-text-muted)]">
                 {search || severityFilter !== "All"
                   ? "Try adjusting your filters."
                   : "All assets are operating within safe thresholds."}
@@ -262,14 +306,22 @@ export function AlertsPage() {
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/60 border-b border-slate-100">
-                  <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Asset</th>
-                  <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Severity</th>
-                  <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Details</th>
-                  <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Timestamp</th>
+                <tr className="bg-[var(--color-industrial-panel)]/80 border-b border-[var(--color-industrial-border)]">
+                  <th className="px-5 py-3 text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest">
+                    Asset
+                  </th>
+                  <th className="px-5 py-3 text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest">
+                    Severity
+                  </th>
+                  <th className="px-5 py-3 text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest">
+                    Details
+                  </th>
+                  <th className="px-5 py-3 text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest text-right">
+                    Timestamp
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[var(--color-industrial-border)]">
                 {paginated.map((alert) => (
                   <AlertRow key={alert.id} alert={alert} />
                 ))}
@@ -281,38 +333,41 @@ export function AlertsPage() {
         {/* ── Pagination ── */}
         {!loading && filtered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-xs text-[var(--color-industrial-text-muted)] font-medium">
               Showing{" "}
-              <span className="font-bold text-slate-800">
+              <span className="font-bold text-[var(--color-industrial-text)]">
                 {(page - 1) * PAGE_SIZE + 1}–
                 {Math.min(page * PAGE_SIZE, filtered.length)}
               </span>{" "}
-              of <span className="font-bold text-slate-800">{filtered.length}</span> alerts
+              of{" "}
+              <span className="font-bold text-[var(--color-industrial-text)]">
+                {filtered.length}
+              </span>{" "}
+              alerts
             </p>
             <div className="flex items-center gap-1">
               <button
                 id="pagination-prev"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-3 py-1.5 text-xs font-black uppercase tracking-widest rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 text-xs font-black uppercase tracking-widest rounded-lg border border-[var(--color-industrial-border)] text-[var(--color-industrial-text-muted)] hover:bg-[var(--color-industrial-panel)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 ← Prev
               </button>
-              <span className="px-3 py-1.5 text-xs font-black text-slate-700">
+              <span className="px-3 py-1.5 text-xs font-black text-[var(--color-industrial-text)]">
                 {page} / {totalPages}
               </span>
               <button
                 id="pagination-next"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-3 py-1.5 text-xs font-black uppercase tracking-widest rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 text-xs font-black uppercase tracking-widest rounded-lg border border-[var(--color-industrial-border)] text-[var(--color-industrial-text-muted)] hover:bg-[var(--color-industrial-panel)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 Next →
               </button>
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
