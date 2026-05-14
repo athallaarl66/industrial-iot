@@ -31,7 +31,9 @@ export function AssetList({ onDelete, refreshTrigger }: AssetListProps) {
         setAssets(response.data);
         setError(null);
       } else {
-        setError(response.message || "The asset registry is currently unavailable.");
+        setError(
+          response.message || "The asset registry is currently unavailable.",
+        );
       }
     } catch {
       setError("High-frequency synchronization error. Verify backend status.");
@@ -73,9 +75,12 @@ export function AssetList({ onDelete, refreshTrigger }: AssetListProps) {
           isConnecting.current = true;
           await signalRService.connect();
         }
-        
+
         if (isMounted) {
-          unsubscribe = signalRService.on("onTelemetryUpdate", handleTelemetryUpdate);
+          unsubscribe = signalRService.on(
+            "onTelemetryUpdate",
+            handleTelemetryUpdate,
+          );
           assets.forEach((a) => signalRService.joinAsset(a.assetCode));
           console.log("[Registry] Real-time telemetry link operational.");
         }
@@ -99,32 +104,43 @@ export function AssetList({ onDelete, refreshTrigger }: AssetListProps) {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden animate-pulse">
+      <div className="bg-[var(--color-industrial-panel)] rounded-2xl shadow-sm border border-[var(--color-industrial-border)] overflow-hidden animate-pulse">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
+          <table className="min-w-full divide-y divide-[var(--color-industrial-border)]">
+            <thead className="bg-[var(--color-industrial-bg)]">
               <tr>
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <th key={i} className="px-6 py-4">
-                    <div className="h-3 bg-slate-200 rounded w-20"></div>
+                    <div className="h-3 bg-[var(--color-industrial-border)]/40 rounded w-20"></div>
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
+            <tbody className="divide-y divide-[var(--color-industrial-border)] bg-[var(--color-industrial-panel)]">
               {[1, 2, 3, 4, 5].map((row) => (
                 <tr key={row}>
-                  <td className="px-6 py-4"><div className="h-4 bg-slate-200 rounded w-32 mb-2"></div><div className="h-3 bg-slate-100 rounded w-24"></div></td>
-                  <td className="px-6 py-4"><div className="h-5 bg-slate-200 rounded-full w-16"></div></td>
-                  <td className="px-6 py-4"><div className="h-4 bg-slate-200 rounded w-20"></div></td>
-                  <td className="px-6 py-4"><div className="h-6 bg-slate-200 rounded-lg w-24"></div></td>
+                  <td className="px-6 py-4">
+                    <div className="h-4 bg-[var(--color-industrial-border)]/60 rounded w-32 mb-2"></div>
+                    <div className="h-3 bg-[var(--color-industrial-border)]/30 rounded w-24"></div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="h-5 bg-[var(--color-industrial-border)]/60 rounded-full w-16"></div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="h-4 bg-[var(--color-industrial-border)]/60 rounded w-20"></div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="h-6 bg-[var(--color-industrial-border)]/60 rounded-lg w-24"></div>
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-4">
-                      <div className="h-8 bg-slate-200 rounded w-12"></div>
-                      <div className="h-8 bg-slate-200 rounded w-12"></div>
+                      <div className="h-8 bg-[var(--color-industrial-border)]/60 rounded w-12"></div>
+                      <div className="h-8 bg-[var(--color-industrial-border)]/60 rounded w-12"></div>
                     </div>
                   </td>
-                  <td className="px-6 py-4"><div className="h-4 bg-slate-200 rounded w-20"></div></td>
+                  <td className="px-6 py-4">
+                    <div className="h-4 bg-[var(--color-industrial-border)]/60 rounded w-20"></div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -136,14 +152,28 @@ export function AssetList({ onDelete, refreshTrigger }: AssetListProps) {
 
   if (error) {
     return (
-      <div className="industrial-panel p-12 text-center max-w-xl mx-auto mt-20 bg-rose-50 border-rose-100">
-        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-rose-100">
-          <svg className="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      <div className="industrial-panel p-12 text-center max-w-xl mx-auto mt-20 bg-[var(--color-industrial-panel)] border border-[var(--color-industrial-border)]">
+        <div className="w-16 h-16 bg-[var(--color-industrial-bg)] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-[var(--color-industrial-border)]">
+          <svg
+            className="w-8 h-8 text-rose-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
           </svg>
         </div>
-        <h4 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">System Interruption</h4>
-        <p className="text-sm text-slate-600 mb-8 font-medium">{error}</p>
+        <h4 className="text-xl font-black text-[var(--color-industrial-text)] mb-2 uppercase tracking-tight">
+          System Interruption
+        </h4>
+        <p className="text-sm text-[var(--color-industrial-text-muted)] mb-8 font-medium">
+          {error}
+        </p>
         <button
           onClick={loadAssets}
           className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl shadow-lg shadow-blue-500/20 transition-all uppercase tracking-widest"

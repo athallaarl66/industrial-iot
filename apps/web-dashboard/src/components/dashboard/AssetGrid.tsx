@@ -58,9 +58,12 @@ export function AssetGrid() {
           isConnecting.current = true;
           await signalRService.connect();
         }
-        
+
         if (isMounted) {
-          unsubscribe = signalRService.on("onTelemetryUpdate", handleTelemetryUpdate);
+          unsubscribe = signalRService.on(
+            "onTelemetryUpdate",
+            handleTelemetryUpdate,
+          );
           assets.forEach((a) => signalRService.joinAsset(a.assetCode));
           console.log("[AssetGrid] Linked to live telemetry stream.");
         }
@@ -85,7 +88,10 @@ export function AssetGrid() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="industrial-panel h-48 bg-slate-50 animate-pulse"></div>
+          <div
+            key={i}
+            className="industrial-panel h-48 animate-pulse border border-[var(--color-industrial-border)]"
+          ></div>
         ))}
       </div>
     );
@@ -96,10 +102,12 @@ export function AssetGrid() {
       {assets.map((asset) => (
         <AssetStatusCard key={asset.id} asset={asset} />
       ))}
-      
+
       {assets.length === 0 && (
-        <div className="col-span-full py-16 text-center bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
-          <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">No Active Nodes In Range</p>
+        <div className="col-span-full py-16 text-center bg-[var(--color-industrial-panel)]/70 rounded-3xl border border-dashed border-[var(--color-industrial-border)]">
+          <p className="text-[var(--color-industrial-text-muted)] font-bold uppercase tracking-widest text-sm">
+            No Active Nodes In Range
+          </p>
         </div>
       )}
     </div>

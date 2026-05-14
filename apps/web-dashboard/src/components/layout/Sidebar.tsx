@@ -45,17 +45,17 @@ const navItems = [
 /**
  * Sidebar Component
  * Provides primary navigation with industrial-themed styling.
- * Optimized for Light theme as requested.
+ * Optimized for Dark theme.
  */
 export function Sidebar() {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <aside className="w-64 bg-slate-50 flex flex-col h-[calc(100vh-64px)] sticky top-16 border-r border-slate-200">
+    <aside className="w-64 bg-[var(--color-industrial-panel)] flex flex-col h-[calc(100vh-64px)] sticky top-16 border-r border-[var(--color-industrial-border)]">
       <div className="flex-1 px-4 py-8 overflow-y-auto custom-scrollbar">
         <nav className="space-y-1">
-          <p className="px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
+          <p className="px-4 text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest mb-4">
             Navigation
           </p>
           {navItems.map((item) => {
@@ -66,15 +66,18 @@ export function Sidebar() {
                 to={item.path}
                 className={`
                   group flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-all duration-200
-                  ${active
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                    : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900"
+                  ${
+                    active
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                      : "text-slate-400 hover:bg-slate-900/80 hover:text-slate-100"
                   }
                 `}
               >
-                <div className={`mr-3 transition-transform duration-200 ${active ? "scale-110" : "group-hover:scale-110"}`}>
+                <div
+                  className={`mr-3 transition-transform duration-200 ${active ? "scale-110" : "group-hover:scale-110"}`}
+                >
                   <svg
-                    className={`w-5 h-5 ${active ? "text-white" : "text-slate-400 group-hover:text-blue-600"}`}
+                    className={`w-5 h-5 ${active ? "text-white" : "text-slate-500 group-hover:text-blue-500"}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -92,19 +95,24 @@ export function Sidebar() {
         </nav>
 
         {/* Status Card in Sidebar */}
-        <div className="mt-10 p-4 rounded-xl bg-white border border-slate-200 shadow-sm mx-1">
+        <div className="mt-10 p-4 rounded-xl bg-[var(--color-industrial-bg)] border border-[var(--color-industrial-border)] shadow-sm mx-1">
           <div className="flex items-center space-x-2 mb-2">
-            <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Gateway</span>
+            <span className="status-dot status-dot-running"></span>
+            <span className="text-[10px] font-bold text-[var(--color-industrial-text-muted)] uppercase tracking-widest">
+              Gateway
+            </span>
           </div>
-          <p className="text-[10px] text-slate-400 leading-normal">
-            Connected to <strong>Cluster 01</strong>. Data streaming active with 12ms latency.
+          <p className="text-[10px] text-[var(--color-industrial-text-muted)] leading-normal">
+            Connected to <strong>Cluster 01</strong>. Data streaming active with
+            12ms latency.
           </p>
         </div>
       </div>
 
-      <div className="p-4 border-t border-slate-200 text-center">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">v1.0.0-STAGE</span>
+      <div className="p-4 border-t border-[var(--color-industrial-border)] text-center">
+        <span className="text-[10px] font-bold text-[var(--color-industrial-text-muted)] uppercase tracking-widest">
+          v1.0.0-STAGE
+        </span>
       </div>
     </aside>
   );

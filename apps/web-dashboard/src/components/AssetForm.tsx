@@ -36,7 +36,7 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
     const assetCodeRegex = /^[A-Z]{2,4}-[A-Z0-9]+-[0-9]{3,4}$/;
-    
+
     if (!formData.assetCode) {
       newErrors.assetCode = "Required";
     } else if (!assetCodeRegex.test(formData.assetCode)) {
@@ -75,40 +75,62 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name as keyof FormErrors]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }));
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
   const getInputClass = (fieldName: keyof FormErrors) => `
     mt-1.5 block w-full rounded-xl border px-4 py-3 text-sm font-bold transition-all duration-200 outline-none
-    ${errors[fieldName] 
-      ? "border-rose-300 bg-rose-50 text-rose-900 focus:ring-4 focus:ring-rose-200/50" 
-      : "border-slate-200 bg-white text-slate-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 placeholder:text-slate-300"
+    ${
+      errors[fieldName]
+        ? "border-rose-300 bg-rose-50 text-rose-900 focus:ring-4 focus:ring-rose-200/50"
+        : "border-[var(--color-industrial-border)] bg-[var(--color-industrial-panel)] text-[var(--color-industrial-text)] focus:border-blue-500 focus:ring-4 focus:ring-blue-100 placeholder:text-[var(--color-industrial-text-muted)]"
     }
   `;
 
   return (
-    <div className="bg-transparent">
+    <div className="bg-[var(--color-industrial-panel)] rounded-3xl p-0 text-[var(--color-industrial-text)]">
       {submitError && (
-        <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl flex items-center animate-in fade-in duration-300">
-          <svg className="w-5 h-5 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <div className="mb-6 bg-rose-950/10 border border-rose-600/20 text-rose-300 px-4 py-3 rounded-xl flex items-center animate-in fade-in duration-300">
+          <svg
+            className="w-5 h-5 mr-3 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
-          <span className="text-xs font-black uppercase tracking-tight">{submitError}</span>
+          <span className="text-xs font-black uppercase tracking-tight">
+            {submitError}
+          </span>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-1">
           <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
-            <label htmlFor="assetCode" className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">
+            <label
+              htmlFor="assetCode"
+              className="text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest leading-normal"
+            >
               Asset Identifier
             </label>
-            {errors.assetCode && <span className="text-[9px] font-black text-rose-500 uppercase bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">{errors.assetCode}</span>}
+            {errors.assetCode && (
+              <span className="text-[9px] font-black text-rose-500 uppercase bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
+                {errors.assetCode}
+              </span>
+            )}
           </div>
           <input
             type="text"
@@ -124,10 +146,17 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
 
         <div className="space-y-1">
           <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
-            <label htmlFor="name" className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">
+            <label
+              htmlFor="name"
+              className="text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest leading-normal"
+            >
               Equipment Name
             </label>
-            {errors.name && <span className="text-[9px] font-black text-rose-500 uppercase bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">{errors.name}</span>}
+            {errors.name && (
+              <span className="text-[9px] font-black text-rose-500 uppercase bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
+                {errors.name}
+              </span>
+            )}
           </div>
           <input
             type="text"
@@ -144,7 +173,10 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
-              <label htmlFor="type" className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">
+              <label
+                htmlFor="type"
+                className="text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest leading-normal"
+              >
                 Category
               </label>
             </div>
@@ -167,7 +199,10 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
 
           <div className="space-y-1">
             <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
-              <label htmlFor="location" className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">
+              <label
+                htmlFor="location"
+                className="text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest leading-normal"
+              >
                 Deployment
               </label>
             </div>
@@ -185,33 +220,43 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
         </div>
 
         {/* Custom Thresholds Section */}
-        <div className="pt-4 border-t border-slate-100">
-          <h3 className="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">Custom Thresholds (Optional)</h3>
-          
+        <div className="pt-4 border-t border-[var(--color-industrial-border)]">
+          <h3 className="text-xs font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest mb-4">
+            Custom Thresholds (Optional)
+          </h3>
+
           <div className="space-y-4">
             {/* Temperature */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">Warn Temp (°C)</label>
+                <label className="text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest leading-normal">
+                  Warn Temp (°C)
+                </label>
                 <input
                   type="number"
                   name="warningTemperature"
                   value={formData.warningTemperature || ""}
                   onChange={handleChange}
                   placeholder="e.g. 80"
-                  className={getInputClass("warningTemperature" as keyof FormErrors)}
+                  className={getInputClass(
+                    "warningTemperature" as keyof FormErrors,
+                  )}
                   disabled={loading}
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">Crit Temp (°C)</label>
+                <label className="text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest leading-normal">
+                  Crit Temp (°C)
+                </label>
                 <input
                   type="number"
                   name="criticalTemperature"
                   value={formData.criticalTemperature || ""}
                   onChange={handleChange}
                   placeholder="e.g. 100"
-                  className={getInputClass("criticalTemperature" as keyof FormErrors)}
+                  className={getInputClass(
+                    "criticalTemperature" as keyof FormErrors,
+                  )}
                   disabled={loading}
                 />
               </div>
@@ -220,26 +265,34 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
             {/* Pressure */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">Warn Press (PSI)</label>
+                <label className="text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest leading-normal">
+                  Warn Press (PSI)
+                </label>
                 <input
                   type="number"
                   name="warningPressure"
                   value={formData.warningPressure || ""}
                   onChange={handleChange}
                   placeholder="e.g. 400"
-                  className={getInputClass("warningPressure" as keyof FormErrors)}
+                  className={getInputClass(
+                    "warningPressure" as keyof FormErrors,
+                  )}
                   disabled={loading}
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">Crit Press (PSI)</label>
+                <label className="text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest leading-normal">
+                  Crit Press (PSI)
+                </label>
                 <input
                   type="number"
                   name="criticalPressure"
                   value={formData.criticalPressure || ""}
                   onChange={handleChange}
                   placeholder="e.g. 500"
-                  className={getInputClass("criticalPressure" as keyof FormErrors)}
+                  className={getInputClass(
+                    "criticalPressure" as keyof FormErrors,
+                  )}
                   disabled={loading}
                 />
               </div>
@@ -248,26 +301,34 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
             {/* Vibration */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">Warn Vib (mm/s)</label>
+                <label className="text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest leading-normal">
+                  Warn Vib (mm/s)
+                </label>
                 <input
                   type="number"
                   name="warningVibration"
                   value={formData.warningVibration || ""}
                   onChange={handleChange}
                   placeholder="e.g. 5"
-                  className={getInputClass("warningVibration" as keyof FormErrors)}
+                  className={getInputClass(
+                    "warningVibration" as keyof FormErrors,
+                  )}
                   disabled={loading}
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-normal">Crit Vib (mm/s)</label>
+                <label className="text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest leading-normal">
+                  Crit Vib (mm/s)
+                </label>
                 <input
                   type="number"
                   name="criticalVibration"
                   value={formData.criticalVibration || ""}
                   onChange={handleChange}
                   placeholder="e.g. 10"
-                  className={getInputClass("criticalVibration" as keyof FormErrors)}
+                  className={getInputClass(
+                    "criticalVibration" as keyof FormErrors,
+                  )}
                   disabled={loading}
                 />
               </div>
@@ -282,16 +343,32 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
             className={`
               w-full flex justify-center items-center py-4 px-6 border border-transparent 
               text-xs font-black rounded-xl text-white shadow-xl transition-all duration-300 uppercase tracking-widest
-              ${loading 
-                ? "bg-slate-200 cursor-not-allowed text-slate-400" 
-                : "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20 active:scale-[0.98]"
+              ${
+                loading
+                  ? "bg-[var(--color-industrial-border)] cursor-not-allowed text-[var(--color-industrial-text-muted)]"
+                  : "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20 active:scale-[0.98]"
               }
             `}
           >
             {loading ? (
-              <svg className="animate-spin h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={4}></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <svg
+                className="animate-spin h-5 w-5 text-slate-400"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth={4}
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
             ) : (
               "Authorize Deployment"
