@@ -8,12 +8,20 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<Asset> Assets => Set<Asset>();
-public DbSet<Telemetry> Telemetries => Set<Telemetry>();
+    public DbSet<Telemetry> Telemetries => Set<Telemetry>();
     public DbSet<Alert> Alerts => Set<Alert>();
+    public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // User configuration
+        modelBuilder.Entity<User>(entity => {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Username).IsRequired().HasMaxLength(50);
+            entity.HasIndex(e => e.Username).IsUnique();
+        });
 
         // Konfigurasi Tabel Asset
         modelBuilder.Entity<Asset>(entity => {

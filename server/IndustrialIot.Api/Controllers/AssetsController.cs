@@ -3,11 +3,13 @@ using IndustrialIot.Application.Common;
 using IndustrialIot.Application.DTOs.Asset;
 using IndustrialIot.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace IndustrialIot.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize]
 public class AssetsController : ControllerBase
 {
     private readonly IAssetService _assetService;
@@ -23,6 +25,7 @@ public class AssetsController : ControllerBase
     /// Mengambil semua daftar master Asset O&G di sistem.
     /// </summary>
     [HttpGet]
+    [Authorize(Policy = "OperatorOrAdmin")]
     [ProducesResponseType(typeof(ApiResponse<List<AssetDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllAssets(CancellationToken cancellationToken)
     {
@@ -34,6 +37,7 @@ public class AssetsController : ControllerBase
     /// Mengambil data Asset spesifik berdasarkan Id.
     /// </summary>
     [HttpGet("{id:guid}")]
+    [Authorize(Policy = "OperatorOrAdmin")]
     [ProducesResponseType(typeof(ApiResponse<AssetDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<AssetDto>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAssetById(Guid id, CancellationToken cancellationToken)
@@ -49,6 +53,7 @@ public class AssetsController : ControllerBase
     /// Menerapkan validasi O&G Naming Convention.
     /// </summary>
     [HttpPost]
+    [Authorize(Policy = "AdminOnly")]
     [ProducesResponseType(typeof(ApiResponse<AssetDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<AssetDto>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateAsset([FromBody] CreateAssetDto dto, CancellationToken cancellationToken)
@@ -72,6 +77,7 @@ public class AssetsController : ControllerBase
     /// Menghapus secara hardware data Asset dari sistem.
     /// </summary>
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = "AdminOnly")]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteAsset(Guid id, CancellationToken cancellationToken)
@@ -86,6 +92,7 @@ public class AssetsController : ControllerBase
     /// Mengambil data histori telemetri untuk Asset tertentu.
     /// </summary>
     [HttpGet("{id:guid}/telemetry")]
+    [Authorize(Policy = "OperatorOrAdmin")]
     [ProducesResponseType(typeof(ApiResponse<List<IndustrialIot.Application.DTOs.Telemetry.TelemetryHistoryDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetTelemetryHistory(Guid id, [FromQuery] int limit = 50, CancellationToken cancellationToken = default)
     {
