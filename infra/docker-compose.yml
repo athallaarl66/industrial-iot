@@ -23,3 +23,45 @@ services:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
+
+  redis:
+    image: redis:7-alpine
+    container_name: iot_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis_data:/data
+
+  backend-api:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+    container_name: iot_backend_api
+    restart: always
+    ports:
+      - "5234:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
+      - Mqtt__Host=mqtt-broker
+      - Mqtt__Port=1883
+      - Mqtt__Username=${MQTT_BACKEND_USER}
+      - Mqtt__Password=${MQTT_BACKEND_PASSWORD}
+    depends_on:
+      - db
+      - mqtt-broker
+      - redis
+
+  frontend-dashboard:
+    build:
+      context: ../apps/web-dashboard
+      dockerfile: Dockerfile
+    container_name: iot_frontend_dashboard
+    restart: always
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend-api
+
+
