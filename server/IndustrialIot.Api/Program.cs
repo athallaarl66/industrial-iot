@@ -6,9 +6,15 @@ using IndustrialIot.Application.Validators;
 using IndustrialIot.Infrastructure.Mqtt;
 using IndustrialIot.Infrastructure.Persistence;
 using IndustrialIot.Infrastructure.Repositories;
+using IndustrialIot.Infrastructure.Services;
 using IndustrialIot.Domain.Models;
+using IndustrialIot.Domain.Enums;
+using IndustrialIot.Application.Common.Security;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +35,63 @@ builder.Services.AddCors(options =>
     });
 });
 
+// 2.5 Setup JWT & Authentication & Authorization
+var jwtSection = builder.Configuration.GetSection(JwtOptions.SectionName);
+builder.Services.Configure<JwtOptions>(jwtSection);
+var jwtOptions = jwtSection.Get<JwtOptions>();
+
+if (jwtOptions == null || string.IsNullOrEmpty(jwtOptions.Secret))
+{
+    throw new InvalidOperationException("JWT Secret is not configured.");
+}
+
+var key = Encoding.ASCII.GetBytes(jwtOptions.Secret);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false; // Dev environment
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = true,
+        ValidIssuer = jwtOptions.Issuer,
+        ValidateAudience = true,
+        ValidAudience = jwtOptions.Audience,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+    
+    // Konfigurasi SignalR JWT Auth (handshake WebSocket)
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/telemetryhub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => 
+        policy.RequireRole(UserRole.Admin.ToString()));
+    options.AddPolicy("OperatorOrAdmin", policy => 
+        policy.RequireRole(UserRole.Admin.ToString(), UserRole.Operator.ToString()));
+});
+
 // 3. Register Application Services & FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<CreateAssetValidator>();
 
@@ -41,6 +104,7 @@ builder.Services.AddScoped<ITelemetryRepository, TelemetryRepository>();
 builder.Services.AddScoped<IAssetService, AssetService>();
 builder.Services.AddScoped<IAlertService, AlertService>();
 builder.Services.AddScoped<IndustrialIot.Application.Services.ITelemetryNotifier, IndustrialIot.Api.Services.TelemetryNotifier>();
+builder.Services.AddScoped<IEmailService, ConsoleEmailService>();
 
 
 // Register MQTT Services
@@ -97,10 +161,28 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("FrontendCorsPolicy");
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
 app.MapHub<IndustrialIot.Api.Hubs.TelemetryHub>("/telemetryhub");
 
+// 6. Automatic Database Migration & Seeding
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        await DatabaseSeeder.SeedAsync(context);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Terjadi kesalahan saat memigrasikan atau melakukan seeding database.");
+    }
+}
+
 app.Run();
+

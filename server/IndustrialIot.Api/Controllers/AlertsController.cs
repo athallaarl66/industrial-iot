@@ -3,10 +3,13 @@ using IndustrialIot.Application.Common;
 using IndustrialIot.Application.DTOs.Alert;
 using IndustrialIot.Application.Services;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace IndustrialIot.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize(Policy = "OperatorOrAdmin")]
 public class AlertsController : ControllerBase
 {
     private readonly IAlertService _alertService;
