@@ -61,5 +61,8 @@ openspec/
 .agent/
 
 # Sensitive internal docs (excluded from public repo)
-docs/Rule_manager.md
-docs/PROJECT_CHECKLIST.md
+docs/05_Project_Management/Rule_Manager.md
+docs/05_Project_Management/Project_Checklist.md
+implementation_plan.md
+task.md
+walkthrough.md
