@@ -201,6 +201,30 @@ public class MqttClientService : IAsyncDisposable
             dbContext.Telemetries.Add(telemetry);
             await dbContext.SaveChangesAsync();
 
+            // Write the latest telemetry to Redis cache
+            try
+            {
+                var redis = scope.ServiceProvider.GetService<StackExchange.Redis.IConnectionMultiplexer>();
+                if (redis != null)
+                {
+                    var redisDb = redis.GetDatabase();
+                    var cacheKey = $"telemetry:latest:{assetCode}";
+                    var cacheValue = JsonSerializer.Serialize(new
+                    {
+                        assetCode,
+                        temperature = (double)telemetry.Temperature,
+                        pressure = (double)telemetry.Pressure,
+                        vibration = (double)telemetry.Vibration,
+                        timestamp = telemetry.EdgeTimestamp
+                    });
+                    await redisDb.StringSetAsync(cacheKey, cacheValue, TimeSpan.FromDays(7));
+                }
+            }
+            catch (Exception redisEx)
+            {
+                _logger.LogWarning("Failed to write latest telemetry to Redis: {Message}", redisEx.Message);
+            }
+
             _logger.LogInformation("Saved telemetry for asset {AssetCode}: Temp={Temp}°C, EdgeTime={EdgeTime}",
                 assetCode, message.Temperature, telemetry.EdgeTimestamp);
 

@@ -44,6 +44,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
+      - ConnectionStrings__RedisConnection=redis:6379
       - Mqtt__Host=mqtt-broker
       - Mqtt__Port=1883
       - Mqtt__Username=${MQTT_BACKEND_USER}

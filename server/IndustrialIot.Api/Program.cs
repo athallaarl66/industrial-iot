@@ -120,7 +120,19 @@ builder.Services.AddHealthChecks();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSignalR();
+// Setup Redis Connection & SignalR Backplane
+var redisConn = builder.Configuration.GetConnectionString("RedisConnection") ?? "localhost:6379";
+try
+{
+    var multiplexer = StackExchange.Redis.ConnectionMultiplexer.Connect(redisConn);
+    builder.Services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(multiplexer);
+    builder.Services.AddSignalR().AddStackExchangeRedis(redisConn);
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Warning: Failed to connect to Redis at {redisConn}: {ex.Message}. SignalR backplane running in-memory.");
+    builder.Services.AddSignalR();
+}
 
 // 4. Setup Swagger Documentation
 builder.Services.AddSwaggerGen(c =>
