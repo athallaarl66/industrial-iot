@@ -2,21 +2,31 @@ const mqtt = require("mqtt");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../infra/.env") });
 
+// Parse command line arguments
+const args = process.argv.slice(2);
+const assetArgIndex = args.indexOf("--asset");
+const tokenArgIndex = args.indexOf("--token");
+const usernameArgIndex = args.indexOf("--username");
+const hostArgIndex = args.indexOf("--host");
+const portArgIndex = args.indexOf("--port");
+
+const customAsset = assetArgIndex !== -1 ? args[assetArgIndex + 1] : null;
+const customToken = tokenArgIndex !== -1 ? args[tokenArgIndex + 1] : null;
+const customUsername = usernameArgIndex !== -1 ? args[usernameArgIndex + 1] : null;
+const customHost = hostArgIndex !== -1 ? args[hostArgIndex + 1] : null;
+const customPort = portArgIndex !== -1 ? args[portArgIndex + 1] : null;
+
 /**
  * CONFIGURATION
- * Credentials are loaded from environment variables.
- * Set them before running: MQTT_USERNAME, MQTT_PASSWORD
- * Or copy infra/.env.example to infra/.env and run with env loaded.
+ * Credentials are loaded from environment variables or command-line overrides.
  */
 const MQTT_OPTIONS = {
-  host: process.env.MQTT_HOST || "localhost",
-  port: parseInt(process.env.MQTT_PORT || "1883"),
-  username: process.env.MQTT_USERNAME || "edge_device",
-  password: process.env.MQTT_PASSWORD || (() => { throw new Error("MQTT_PASSWORD env var is required. See infra/.env.example"); })(),
-  clientId: `telemetry-simulator-${Math.random().toString(16).substring(2, 8)}`,
+  host: customHost || process.env.MQTT_HOST || "localhost",
+  port: parseInt(customPort || process.env.MQTT_PORT || "1883"),
+  username: customUsername || customAsset || process.env.MQTT_USERNAME || "edge_device",
+  password: customToken || process.env.MQTT_PASSWORD || (() => { throw new Error("MQTT_PASSWORD env var is required. See infra/.env.example"); })(),
+  clientId: `telemetry-simulator-${customAsset || Math.random().toString(16).substring(2, 8)}`,
 };
-
-
 
 const API_BASE_URL = "http://localhost:5234/api/v1";
 const SYNC_INTERVAL_MS = 60000; // Refetch assets every 1 minute
@@ -32,6 +42,12 @@ let client = null;
  * Fetch registered assets from the Backend API
  */
 async function fetchAssets() {
+  if (customAsset) {
+    activeAssets = [customAsset];
+    console.log(`🔒 Static Asset Mode Enabled: Monitoring [${customAsset}]`);
+    return;
+  }
+
   try {
     console.log("🔄 Syncing asset registry from API...");
     const response = await fetch(`${API_BASE_URL}/assets`);
