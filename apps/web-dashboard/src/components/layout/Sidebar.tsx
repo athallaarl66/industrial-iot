@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext.tsx";
 
 /**
  * Navigation Item Definition
@@ -40,6 +41,19 @@ const navItems = [
       />
     ),
   },
+  {
+    name: "Provisioning",
+    path: "/provisioning",
+    adminOnly: true,
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+      />
+    ),
+  },
 ];
 
 /**
@@ -49,7 +63,16 @@ const navItems = [
  */
 export function Sidebar() {
   const location = useLocation();
+  const { user } = useAuth();
+  
   const isActive = (path: string) => location.pathname === path;
+  
+  const allowedNavItems = navItems.filter((item) => {
+    if (item.adminOnly) {
+      return user?.role === "Admin";
+    }
+    return true;
+  });
 
   return (
     <aside className="w-64 bg-[var(--color-industrial-panel)] flex flex-col h-[calc(100vh-64px)] sticky top-16 border-r border-[var(--color-industrial-border)]">
@@ -58,7 +81,7 @@ export function Sidebar() {
           <p className="px-4 text-[10px] font-black text-[var(--color-industrial-text-muted)] uppercase tracking-widest mb-4">
             Navigation
           </p>
-          {navItems.map((item) => {
+          {allowedNavItems.map((item) => {
             const active = isActive(item.path);
             return (
               <Link

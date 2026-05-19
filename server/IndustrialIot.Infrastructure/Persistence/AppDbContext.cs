@@ -11,10 +11,20 @@ public class AppDbContext : DbContext
     public DbSet<Telemetry> Telemetries => Set<Telemetry>();
     public DbSet<Alert> Alerts => Set<Alert>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<EdgeCredential> EdgeCredentials => Set<EdgeCredential>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // EdgeCredential configuration
+        modelBuilder.Entity<EdgeCredential>(entity => {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.AssetCode).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Token).IsRequired().HasMaxLength(100);
+            entity.HasIndex(e => e.AssetCode);
+            entity.HasIndex(e => e.Token).IsUnique();
+        });
 
         // User configuration
         modelBuilder.Entity<User>(entity => {

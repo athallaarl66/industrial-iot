@@ -13,7 +13,7 @@ services:
       - ./db_data:/var/lib/postgresql/data
 
   mqtt-broker:
-    image: eclipse-mosquitto:latest
+    image: iegomez/mosquitto-go-auth:latest
     container_name: iot_mosquitto
     restart: always
     ports:

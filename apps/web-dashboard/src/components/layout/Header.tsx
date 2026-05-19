@@ -1,5 +1,6 @@
-import { Moon, SunMedium } from "lucide-react";
+import { Moon, SunMedium, LogOut } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext.tsx";
+import { useAuth } from "../../contexts/AuthContext.tsx";
 
 /**
  * Header Component
@@ -7,6 +8,7 @@ import { useTheme } from "../../contexts/ThemeContext.tsx";
  */
 export function Header() {
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
 
   return (
     <header className="bg-[var(--color-industrial-panel)] border-b border-[var(--color-industrial-border)] sticky top-0 z-40 px-4 sm:px-6 lg:px-8 h-16 flex items-center shadow-sm transition-colors duration-500">
@@ -51,19 +53,29 @@ export function Header() {
           <div className="h-4 w-px bg-[var(--color-industrial-border)]"></div>
 
           {/* User Profile */}
-          <div className="flex items-center space-x-3 hover:bg-[var(--color-industrial-border)] p-1.5 rounded-xl transition-all cursor-pointer">
-            <div className="flex flex-col text-right hidden sm:flex">
-              <span className="text-sm font-bold text-[var(--color-industrial-text)] leading-none">
-                A. Arli
-              </span>
-              <span className="text-[10px] font-bold text-[var(--color-industrial-text-muted)] uppercase tracking-tighter mt-1">
-                Administrator
-              </span>
+          {user && (
+            <div className="flex items-center space-x-3">
+              <div className="flex flex-col text-right hidden sm:flex">
+                <span className="text-sm font-bold text-[var(--color-industrial-text)] leading-none">
+                  {user.username}
+                </span>
+                <span className="text-[10px] font-bold text-[var(--color-industrial-text-muted)] uppercase tracking-tighter mt-1">
+                  {user.role}
+                </span>
+              </div>
+              <div className="w-9 h-9 rounded-full bg-[var(--color-industrial-border)]/40 border border-[var(--color-industrial-border)] flex items-center justify-center text-[var(--color-industrial-text)] font-bold text-xs ring-2 ring-[var(--color-industrial-border)] uppercase">
+                {user.username.substring(0, 2)}
+              </div>
+              <button
+                type="button"
+                onClick={logout}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-industrial-border)] bg-[var(--color-industrial-panel)]/80 text-[var(--color-industrial-text-muted)] hover:text-[var(--color-industrial-rose)] hover:bg-[var(--color-industrial-border)] transition-all focus:outline-none"
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
-            <div className="w-9 h-9 rounded-full bg-[var(--color-industrial-border)]/40 border border-[var(--color-industrial-border)] flex items-center justify-center text-[var(--color-industrial-text)] font-bold text-xs ring-2 ring-[var(--color-industrial-border)]">
-              AA
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </header>
