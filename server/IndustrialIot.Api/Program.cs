@@ -35,7 +35,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendCorsPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // React Dev Server
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174") // React Dev Server
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); // Penting untuk SignalR nanti
