@@ -14,7 +14,7 @@ Enterprise-grade monitoring dashboard for Industrial IoT assets with real-time t
 
 ## 📋 Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 20+ and npm
 - Running Industrial IoT API backend
 - Access to MQTT Broker (for telemetry data)
 - PostgreSQL database (for historical data)
