@@ -45,7 +45,7 @@ function getBoolEnvVar(key: string, fallback: boolean): boolean {
  */
 export const config: AppConfig = {
   api: {
-    baseUrl: getEnvVar('VITE_API_BASE_URL', 'http://localhost:5234/api/v1'),
+    baseUrl: getEnvVar('VITE_API_BASE_URL', 'http://localhost:5234'),
   },
   signalr: {
     hubUrl: getEnvVar('VITE_SIGNALR_HUB_URL', 'http://localhost:5234/telemetryhub'),
