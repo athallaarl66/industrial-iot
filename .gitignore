@@ -59,6 +59,8 @@ Thumbs.db
 .claude/
 openspec/
 .agent/
+.windsurf
+
 
 # Sensitive internal docs (excluded from public repo)
 docs/05_Project_Management/Rule_Manager.md

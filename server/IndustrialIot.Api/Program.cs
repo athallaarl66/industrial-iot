@@ -14,7 +14,14 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 using System.Text;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -115,12 +122,19 @@ builder.Services.Configure<AlertThresholds>(
 builder.Services.AddSingleton<MqttClientService>();
 builder.Services.AddHostedService<MqttBackgroundService>();
 
+// Register Redis
+var redisConnectionString = builder.Configuration.GetSection("Redis:ConnectionString").Value;
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    return ConnectionMultiplexer.Connect(redisConnectionString ?? "localhost:6379");
+});
+
 // Add Health Checks
 builder.Services.AddHealthChecks();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR().AddStackExchangeRedis(redisConnectionString ?? "localhost:6379");
 
 // 4. Setup Swagger Documentation
 builder.Services.AddSwaggerGen(c =>
