@@ -127,7 +127,7 @@ This project follows a monorepo approach:
 ### 1. Prerequisites
 - Docker Desktop
 - .NET 8 SDK
-- Node.js 18+ & npm
+- Node.js 20+ & npm
 - Git
 
 ### 2. Clone & Infrastructure
