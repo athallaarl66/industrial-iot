@@ -63,6 +63,8 @@ npm run dev
 ```
 
 > **Action**: Open browser to `http://localhost:5173`.
+> 
+> **Note**: On first launch, you will be redirected to the login page. Default admin credentials are seeded automatically by the system.
 
 ### Step C: Trigger the Simulation
 
@@ -114,6 +116,20 @@ The system automatically logs every threshold violation.
 > [!NOTE]
 > The **Alerts Hub** UI is currently in "Awaiting Uplink" status. While backend alerts are functional and stored in the database, the dedicated management dashboard is being provisioned for the next release.
 
+### 🔐 4.5. Authentication
+
+The platform now requires authentication for accessing the Command Center.
+
+**Login Flow:**
+1. Navigate to `http://localhost:5173/login`
+2. Enter your credentials
+3. Access granted to all protected routes
+
+**User Management:**
+- Default admin user is automatically seeded on first startup
+- Additional users can be created via the API (Admin role required)
+- JWT tokens are used for session management
+
 ---
 
 ## 💾 5. Database Management
@@ -136,9 +152,31 @@ Generates a new migration file after you've modified the Domain/Infrastructure m
 ./scripts/db-migrate.ps1 -Name "DescriptionOfChange"
 ```
 
+### 🌱 Auto-Seeding
+
+The system automatically seeds the default admin user on first startup via `DatabaseSeeder`. No manual seeding is required.
+
 ---
 
-## 🔧 6. Troubleshooting & FAQ
+## ⚡ 6. Redis Caching
+
+The platform uses Redis for high-performance telemetry caching and SignalR backplane scaling.
+
+**Requirements:**
+- Redis container is included in `docker-compose.yml`
+- Port 6379 must be available
+- Configured in `appsettings.json` under `Redis:ConnectionString`
+
+**Purpose:**
+- Cache latest telemetry per asset for fast retrieval
+- Enable SignalR horizontal scaling across multiple backend instances
+- Reduce database load for frequently accessed data
+
+---
+
+---
+
+## 🔧 7. Troubleshooting & FAQ
 
 **Q: I don't see any data in the dashboard.**
 
