@@ -14,6 +14,7 @@ using IndustrialIot.Application.Services;
 using MQTTnet.Client;
 using IndustrialIot.Domain.Enums;
 using IndustrialIot.Domain.Models;
+using StackExchange.Redis;
 
 namespace IndustrialIot.Infrastructure.Mqtt;
 
@@ -26,17 +27,20 @@ public class MqttClientService : IAsyncDisposable
     private readonly ILogger<MqttClientService> _logger;
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly Channel<TelemetryMessage> _channel;
+    private readonly IConnectionMultiplexer _redis;
 
     public MqttClientService(
         IOptions<MqttSettings> settings,
         IOptions<AlertThresholds> thresholds,
         IServiceScopeFactory scopeFactory,
-        ILogger<MqttClientService> logger)
+        ILogger<MqttClientService> logger,
+        IConnectionMultiplexer redis)
     {
         _settings = settings.Value;
         _thresholds = thresholds.Value;
         _scopeFactory = scopeFactory;
         _logger = logger;
+        _redis = redis;
 
         // Bounded channel to prevent memory issues under high load
         _channel = Channel.CreateBounded<TelemetryMessage>(new BoundedChannelOptions(10000)
@@ -200,6 +204,20 @@ public class MqttClientService : IAsyncDisposable
 
             dbContext.Telemetries.Add(telemetry);
             await dbContext.SaveChangesAsync();
+
+            // Cache latest telemetry in Redis
+            var db = _redis.GetDatabase();
+            var cacheKey = $"telemetry:{assetCode}";
+            var cacheValue = JsonSerializer.Serialize(new
+            {
+                assetCode,
+                temperature = telemetry.Temperature,
+                pressure = telemetry.Pressure,
+                vibration = telemetry.Vibration,
+                timestamp = telemetry.EdgeTimestamp,
+                status = asset.Status.ToString()
+            });
+            await db.StringSetAsync(cacheKey, cacheValue, TimeSpan.FromHours(1));
 
             _logger.LogInformation("Saved telemetry for asset {AssetCode}: Temp={Temp}°C, EdgeTime={EdgeTime}",
                 assetCode, message.Temperature, telemetry.EdgeTimestamp);

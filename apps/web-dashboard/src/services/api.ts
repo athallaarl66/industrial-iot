@@ -12,16 +12,27 @@ export interface ApiResponse<T> {
 }
 
 class ApiService {
+  private getToken(): string | null {
+    return localStorage.getItem('jwt_token');
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     try {
+      const token = this.getToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...options.headers as Record<string, string>,
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${config.api.baseUrl}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-        },
+        headers,
         ...options,
       });
 
